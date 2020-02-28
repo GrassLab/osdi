@@ -1,4 +1,4 @@
-.PHONY: all, en, clean
+.PHONY: all, en, tw, clean
 en:
 	sphinx-build . _build/html/en
 
