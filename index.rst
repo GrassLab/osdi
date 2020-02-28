@@ -63,6 +63,7 @@ If you find any of them, send an issue to the course github.
   :caption: Hardware
   :hidden:
 
+  hardware/asm
 
 
 .. toctree::
