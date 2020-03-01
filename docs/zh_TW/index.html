@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>NCTU, Operating System Design &amp; Implementation, Spring 2020 &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script type="text/javascript" src="_static/translations.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜尋" href="search.html" />
+    <link rel="next" title="Lab 0: Environment Setup" href="labs/lab0.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="labs/lab0.html">Lab 0: Environment Setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hardware/asm.html">The Assembly You Need</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>NCTU, Operating System Design &amp; Implementation, Spring 2020</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="nctu-operating-system-design-implementation-spring-2020">
+<h1>NCTU, Operating System Design &amp; Implementation, Spring 2020<a class="headerlink" href="#nctu-operating-system-design-implementation-spring-2020" title="本標題的永久連結">¶</a></h1>
+<p><a class="reference external" href="/zh_TW">中文</a></p>
+<p>This course aims to introduce the design and implementation of the operating system kernel.
+You’ll learn both concept and implementation from a series of labs.</p>
+<p>This course uses <a class="reference external" href="https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/">Raspberry Pi 3 Model B+</a> (rpi3 for short)
+as a hardware platform.
+Students can get their hands dirty on a <strong>Real Machine</strong> instead of an emulator.</p>
+<div class="section" id="labs">
+<h2>Labs<a class="headerlink" href="#labs" title="本標題的永久連結">¶</a></h2>
+<p>There are 9 + 1 labs in this course.
+You’ll learn the concept of <strong>design</strong> of kernel by <strong>implementing</strong> it yourself.</p>
+<p>The main point of these labs is the design principle not programming languages.
+Hence, you are free to choose any programming languages such as ASM/C/C++/Rust.
+However, there are a lot of things which are language dependent and even compiler dependent.
+You need to manage them yourself.</p>
+<p>We use <code class="docutils literal notranslate"><span class="pre">aarch64-linux-gnu-</span></code> toolchain and C to develop.
+If you choose other toolchain or programming languages, we might not help you.</p>
+<p>There are 5 types of labels appear in each lab.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 83%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">required</span></code></p></td>
+<td><p>You’re required to implement it by the description, they take up major of your scores.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">elective</span></code></p></td>
+<td><p>You’re supposed to choose some of them to get full credit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">question</span></code></p></td>
+<td><p>During the demo, you need to answer the question correctly to get full score.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bonus</span></code></p></td>
+<td><p>It’s not required. You can still implement it and get a bonus.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="hardware">
+<h2>Hardware<a class="headerlink" href="#hardware" title="本標題的永久連結">¶</a></h2>
+<p>Students who register this course will get a rpi3, a 5.1V 2.5A power supply, a USB-TTL cable, a micro SD card, and an SD card reader.</p>
+<p>We don’t expect every student to have experience in embedded system or microcontroller.
+So, the hardware information needed by labs will be provided.
+You can check them when you need them.</p>
+</div>
+<div class="section" id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="本標題的永久連結">¶</a></h2>
+<p>We’re not kernel developers or experienced embedded developers.
+It’s common we made mistakes in the description.
+If you find any of them, send an issue to the course github.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>This documentation is not well self-contained, you can get more information from external references.</p>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="labs/lab0.html" class="btn btn-neutral float-right" title="Lab 0: Environment Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

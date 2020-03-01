@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 0: Environment Setup &mdash; nctuos 0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="prev" title="NCTU, Operating System Design &amp; Implementation, Spring 2020" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 0: Environment Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cross-platform-development">Cross-platform development</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cross-compiler">Cross compiler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bare-metal-programming">Bare Metal Programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#linker">Linker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qemu">QEMU</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#from-source-code-to-kernel-image">From source code to kernel image</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#from-source-code-to-object-files">From source code to object files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#from-object-files-to-elf">From object files to ELF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#from-elf-to-kernel-image">From elf to kernel image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-on-qemu">Check on QEMU</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#deploy-to-real-rpi3">Deploy to REAL rpi3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flash-bootable-image-to-sd-card">Flash bootable image to SD card</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interact-with-rpi3">Interact with rpi3</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging">Debugging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#debug-on-qemu">Debug on QEMU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug-on-real-rpi3">Debug on real rpi3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 0: Environment Setup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab0.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-0-environment-setup">
+<h1>Lab 0: Environment Setup<a class="headerlink" href="#lab-0-environment-setup" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The first step of creating a masterpiece is preparing the tool.
+You’re going to implement a 64-bit kernel on ARM CPU.
+Hence, you need a toolchain to help you finish the jobs.</p>
+<p>In this lab, you’ll set up the working environment for future development.</p>
+</div>
+<div class="section" id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Understand cross-platform development.</p></li>
+<li><p>Setup the working environment.</p></li>
+<li><p>Test your hardware.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This lab is an introductory lab, it won’t be taken as part of your final grade.
+But you still need to do the <code class="docutils literal notranslate"><span class="pre">required</span></code> stuff, or you’ll be in trouble in the next lab.</p>
+</div>
+</div>
+<div class="section" id="cross-platform-development">
+<h2>Cross-platform development<a class="headerlink" href="#cross-platform-development" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cross-compiler">
+<h3>Cross compiler<a class="headerlink" href="#cross-compiler" title="Permalink to this headline">¶</a></h3>
+<p>rpi3 uses ARM Cortex-A53 CPU.
+You need a cross-compiler either using C/C++/Rust.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Install the cross compiler on your host computer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span></code> What’s the RAM size of Raspberry Pi 3B+?</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span></code> What’s the cache size and level of Raspberry Pi 3B+?</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You’re doing 64-bit programming, make sure you choose the right cross compiler.</p>
+</div>
+</div>
+<div class="section" id="bare-metal-programming">
+<h3>Bare Metal Programming<a class="headerlink" href="#bare-metal-programming" title="Permalink to this headline">¶</a></h3>
+<p>Some features and standard library of a programming language rely on operating system support.
+Hence you cannot naively use them.</p>
+<p>Also, you should set the corresponding compiler flags to generate correct code.</p>
+</div>
+<div class="section" id="linker">
+<h3>Linker<a class="headerlink" href="#linker" title="Permalink to this headline">¶</a></h3>
+<p>You might not notice the existence of linker.
+It’s because the compiler uses the default linker script for you. (<code class="docutils literal notranslate"><span class="pre">ld</span> <span class="pre">--verbose</span></code> to check the content)
+But in bare metal programming, you should set the memory layout yourself.</p>
+<p>This is an incomplete linker script for you, you should extend it in the following lab.</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span>SECTIONS
+{
+  . = 0x80000;
+  .text : { *(.text) }
+}
+</pre></div>
+</td></tr></table></div>
+<p><code class="docutils literal notranslate"><span class="pre">question</span></code> Explain each line of the above linker script.</p>
+</div>
+<div class="section" id="qemu">
+<h3>QEMU<a class="headerlink" href="#qemu" title="Permalink to this headline">¶</a></h3>
+<p>In cross-platform development,
+it’s easier to validate on emulators first to get better control.
+You can use QEMU to test your code first before validating them on your real rpi3.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Although QEMU provides a machine option for rpi3, it doesn’t act the same as real rpi3.
+You should validate your code on rpi3, too.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Install <code class="docutils literal notranslate"><span class="pre">qemu-system-aarch64</span></code> as an emulator for rpi3.</p>
+</div>
+</div>
+<div class="section" id="from-source-code-to-kernel-image">
+<h2>From source code to kernel image<a class="headerlink" href="#from-source-code-to-kernel-image" title="Permalink to this headline">¶</a></h2>
+<p>You have the basic knowledge of the toolchain for cross-platform development.
+Now, it’s time to practice them.</p>
+<div class="section" id="from-source-code-to-object-files">
+<h3>From source code to object files<a class="headerlink" href="#from-source-code-to-object-files" title="Permalink to this headline">¶</a></h3>
+<p>Source code is compiled or assembled to be object file by cross compiler.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="n">section</span> <span class="s">&quot;.text&quot;</span>
+<span class="nl">_start</span><span class="p">:</span>
+  <span class="n">wfe</span>
+  <span class="n">b</span> <span class="n">_start</span>
+</pre></div>
+</div>
+<p>Assemble the assembly to object file by the following command.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>aarch64-linux-gnu-gcc -c a.S
+</pre></div>
+</div>
+</div>
+<div class="section" id="from-object-files-to-elf">
+<h3>From object files to ELF<a class="headerlink" href="#from-object-files-to-elf" title="Permalink to this headline">¶</a></h3>
+<p>Linker links object files to a ELF file
+It contains debugging information for debugger.
+It also could be load by QEMU and some bootloaders.</p>
+<p>Save the provided linker script as linker.ld and run the following command to link the object file.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>aarch64-linux-gnu-ld -T linker.ld -o kernel8.elf a.o
+</pre></div>
+</div>
+</div>
+<div class="section" id="from-elf-to-kernel-image">
+<h3>From elf to kernel image<a class="headerlink" href="#from-elf-to-kernel-image" title="Permalink to this headline">¶</a></h3>
+<p>To run your code on real rpi3,
+you need to make the elf file a raw binary image.
+Also, the default name of it should be kernel8.img.
+You can use objcopy to translate elf to raw binary.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>aarch64-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
+</pre></div>
+</div>
+</div>
+<div class="section" id="check-on-qemu">
+<h3>Check on QEMU<a class="headerlink" href="#check-on-qemu" title="Permalink to this headline">¶</a></h3>
+<p>After building,  you can use QEMU to see the dumped assembly.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>qemu-system-aarch64 -M raspi3 -kernel kernel8.img -display none -d in_asm
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Build your first kernel image and check it by QEMU.</p>
+</div>
+</div>
+<div class="section" id="deploy-to-real-rpi3">
+<h2>Deploy to REAL rpi3<a class="headerlink" href="#deploy-to-real-rpi3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="flash-bootable-image-to-sd-card">
+<h3>Flash bootable image to SD card<a class="headerlink" href="#flash-bootable-image-to-sd-card" title="Permalink to this headline">¶</a></h3>
+<p>To prepare a bootable image for rpi3, you have to prepare at least the following stuff.</p>
+<ul class="simple">
+<li><p>A FAT16/32 partition contains</p>
+<ul>
+<li><p>Firmware for GPU</p></li>
+<li><p>Kernel image</p></li>
+</ul>
+</li>
+</ul>
+<p>There are two ways to do it.</p>
+<ol class="arabic">
+<li><p>We already prepared a bootable image.
+You can use the following command to flash it to your sd card.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>dd if=nctuos.img of=/dev/sdb
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>/dev/sdb should be replaced by your sd card device, you can check it by <cite>lsblk</cite></p>
+</div>
+<p>It’s already partition and contains a FAT32 filesystem with firmware inside.
+You can mount the partition to check.</p>
+</li>
+<li><p>Partition the disk and prepare the booting firmware yourself.
+You can download the firmware from
+<a class="reference external" href="https://github.com/raspberrypi/firmware/tree/master/boot">https://github.com/raspberrypi/firmware/tree/master/boot</a></p>
+<p>bootcode.bin, fixup.dat and start.elf are essentials.
+More information about pi3’s booting could be checked on official website
+<a class="reference external" href="https://www.raspberrypi.org/documentation/configuration/boot_folder.md">https://www.raspberrypi.org/documentation/configuration/boot_folder.md</a>
+<a class="reference external" href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/README.md">https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/README.md</a></p>
+<p>Finally, put firmware and your kernel image into the FAT partition.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Besides using mkfs.fat -F 32 to FAT32 you should also set the partition type.</p>
+</div>
+</li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Use either one of the methods to set up your sd card.</p>
+</div>
+<div class="section" id="interact-with-rpi3">
+<h3>Interact with rpi3<a class="headerlink" href="#interact-with-rpi3" title="Permalink to this headline">¶</a></h3>
+<p>Use the provided kernel8.img and connect TX, RX, GND to the corresponding pin on rpi3.
+After power on, you can read and write data from /dev/ttyUSB0 (Linux).
+You can use putty or screen with baud rate 115200 to interact with your rpi3.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>screen /dev/ttyUSB0 115200
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debug-on-qemu">
+<h3>Debug on QEMU<a class="headerlink" href="#debug-on-qemu" title="Permalink to this headline">¶</a></h3>
+<p>Debugging on QEMU is a relatively easy way to validate your code.
+QEMU could show the content of memory and registers or expose them to debugger.
+You can use the following command waiting for gdb connection.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>qemu-system-aarch64 -M raspi3 -kernel kernel8.img -display none -S -s
+</pre></div>
+</div>
+<p>Then you can use the following command in gdb to load debugging information and connect to QEMU.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>file kernel8.elf
+target remote :1234
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Your gdb should also be cross-platform gdb.</p>
+</div>
+</div>
+<div class="section" id="debug-on-real-rpi3">
+<h3>Debug on real rpi3<a class="headerlink" href="#debug-on-real-rpi3" title="Permalink to this headline">¶</a></h3>
+<p>If you’d like to debug on real rpi3, you could either use print log or using JTAG.
+We don’t provide JTAG in this course, you can try it if you have one.
+<a class="reference external" href="https://metebalci.com/blog/bare-metal-raspberry-pi-3b-jtag/">https://metebalci.com/blog/bare-metal-raspberry-pi-3b-jtag/</a></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="NCTU, Operating System Design &amp; Implementation, Spring 2020" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
