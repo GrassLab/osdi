@@ -5,7 +5,7 @@
 
 NCTU, Operating System Design & Implementation, Spring 2020
 ===========================================================
-`中文 </zh_TW>`__
+`中文 <../zh_TW/index.html>`__
 
 This course aims to introduce the design and implementation of the operating system kernel.
 You'll learn both concept and implementation from a series of labs.

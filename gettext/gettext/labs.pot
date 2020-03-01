@@ -1,0 +1,273 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, Jim
+# This file is distributed under the same license as the nctuos package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nctuos \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-01 16:23+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:3
+msgid "Lab 0: Environment Setup"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:6
+msgid "Introduction"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:7
+msgid "The first step of creating a masterpiece is preparing the tool. You're going to implement a 64-bit kernel on ARM CPU. Hence, you need a toolchain to help you finish the jobs."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:11
+msgid "In this lab, you'll set up the working environment for future development."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:14
+msgid "Goals of this lab"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:16
+msgid "Understand cross-platform development."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:18
+msgid "Setup the working environment."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:20
+msgid "Test your hardware."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:23
+msgid "This lab is an introductory lab, it won't be taken as part of your final grade. But you still need to do the ``required`` stuff, or you'll be in trouble in the next lab."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:27
+msgid "Cross-platform development"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:30
+msgid "Cross compiler"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:31
+msgid "rpi3 uses ARM Cortex-A53 CPU. You need a cross-compiler either using C/C++/Rust."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:34
+msgid "``required`` Install the cross compiler on your host computer."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:36
+msgid "``question`` What's the RAM size of Raspberry Pi 3B+?"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:38
+msgid "``question`` What's the cache size and level of Raspberry Pi 3B+?"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:40
+msgid "You're doing 64-bit programming, make sure you choose the right cross compiler."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:43
+msgid "Bare Metal Programming"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:44
+msgid "Some features and standard library of a programming language rely on operating system support. Hence you cannot naively use them."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:47
+msgid "Also, you should set the corresponding compiler flags to generate correct code."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:50
+msgid "Linker"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:51
+msgid "You might not notice the existence of linker. It's because the compiler uses the default linker script for you. (``ld --verbose`` to check the content) But in bare metal programming, you should set the memory layout yourself."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:55
+msgid "This is an incomplete linker script for you, you should extend it in the following lab."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:66
+msgid "``question`` Explain each line of the above linker script."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:69
+msgid "QEMU"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:70
+msgid "In cross-platform development, it's easier to validate on emulators first to get better control. You can use QEMU to test your code first before validating them on your real rpi3."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:75
+msgid "Although QEMU provides a machine option for rpi3, it doesn't act the same as real rpi3. You should validate your code on rpi3, too."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:78
+msgid "``required`` Install ``qemu-system-aarch64`` as an emulator for rpi3."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:81
+msgid "From source code to kernel image"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:83
+msgid "You have the basic knowledge of the toolchain for cross-platform development. Now, it's time to practice them."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:87
+msgid "From source code to object files"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:89
+msgid "Source code is compiled or assembled to be object file by cross compiler."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:98
+msgid "Assemble the assembly to object file by the following command."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:105
+msgid "From object files to ELF"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:107
+msgid "Linker links object files to a ELF file It contains debugging information for debugger. It also could be load by QEMU and some bootloaders."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:111
+msgid "Save the provided linker script as linker.ld and run the following command to link the object file."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:119
+msgid "From elf to kernel image"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:121
+msgid "To run your code on real rpi3, you need to make the elf file a raw binary image. Also, the default name of it should be kernel8.img. You can use objcopy to translate elf to raw binary."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:131
+msgid "Check on QEMU"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:133
+msgid "After building,  you can use QEMU to see the dumped assembly."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:139
+msgid "``required`` Build your first kernel image and check it by QEMU."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:143
+msgid "Deploy to REAL rpi3"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:146
+msgid "Flash bootable image to SD card"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:147
+msgid "To prepare a bootable image for rpi3, you have to prepare at least the following stuff."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:149
+msgid "A FAT16/32 partition contains"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:151
+msgid "Firmware for GPU"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:153
+msgid "Kernel image"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:155
+msgid "There are two ways to do it."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:158
+msgid "We already prepared a bootable image. You can use the following command to flash it to your sd card."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:165
+msgid "/dev/sdb should be replaced by your sd card device, you can check it by `lsblk`"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:167
+msgid "It's already partition and contains a FAT32 filesystem with firmware inside. You can mount the partition to check."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:171
+msgid "Partition the disk and prepare the booting firmware yourself. You can download the firmware from https://github.com/raspberrypi/firmware/tree/master/boot"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:175
+msgid "bootcode.bin, fixup.dat and start.elf are essentials. More information about pi3's booting could be checked on official website https://www.raspberrypi.org/documentation/configuration/boot_folder.md https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/README.md"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:180
+msgid "Finally, put firmware and your kernel image into the FAT partition."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:183
+msgid "Besides using mkfs.fat -F 32 to FAT32 you should also set the partition type."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:186
+msgid "``required`` Use either one of the methods to set up your sd card."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:189
+msgid "Interact with rpi3"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:190
+msgid "Use the provided kernel8.img and connect TX, RX, GND to the corresponding pin on rpi3. After power on, you can read and write data from /dev/ttyUSB0 (Linux). You can use putty or screen with baud rate 115200 to interact with your rpi3."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:200
+msgid "Debugging"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:203
+msgid "Debug on QEMU"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:205
+msgid "Debugging on QEMU is a relatively easy way to validate your code. QEMU could show the content of memory and registers or expose them to debugger. You can use the following command waiting for gdb connection."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:213
+msgid "Then you can use the following command in gdb to load debugging information and connect to QEMU."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:221
+msgid "Your gdb should also be cross-platform gdb."
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:225
+msgid "Debug on real rpi3"
+msgstr ""
+
+#: /home/me/osdi2020/docs/labs/lab0.rst:227
+msgid "If you'd like to debug on real rpi3, you could either use print log or using JTAG. We don't provide JTAG in this course, you can try it if you have one. https://metebalci.com/blog/bare-metal-raspberry-pi-3b-jtag/"
+msgstr ""

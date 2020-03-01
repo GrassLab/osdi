@@ -1,0 +1,149 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, Jim
+# This file is distributed under the same license as the nctuos package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nctuos \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-01 16:23+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: /home/me/osdi2020/docs/index.rst:18 /home/me/osdi2020/docs/index.rst:39
+msgid "Labs"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:46 /home/me/osdi2020/docs/index.rst:62
+msgid "Hardware"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:69
+msgid "Miscs"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:7
+msgid "NCTU, Operating System Design & Implementation, Spring 2020"
+msgstr "國立交通大學 作業系統設計與實作 108下"
+
+#: /home/me/osdi2020/docs/index.rst:8
+msgid "`中文 <../zh_TW/index.html>`__"
+msgstr ""
+"`English <../en/index.html>`__"
+
+#: /home/me/osdi2020/docs/index.rst:10
+msgid ""
+"This course aims to introduce the design and implementation of the "
+"operating system kernel. You'll learn both concept and implementation "
+"from a series of labs."
+msgstr ""
+"這門課...."
+
+#: /home/me/osdi2020/docs/index.rst:13
+msgid ""
+"This course uses `Raspberry Pi 3 Model B+ "
+"<https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/>`_ "
+"(rpi3 for short) as a hardware platform. Students can get their hands "
+"dirty on a **Real Machine** instead of an emulator."
+msgstr ""
+"樹莓派3 B+...."
+"<https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/>`_ "
+"(後面簡稱rpi3)..."
+
+#: /home/me/osdi2020/docs/index.rst:19
+msgid ""
+"There are 9 + 1 labs in this course. You'll learn the concept of "
+"**design** of kernel by **implementing** it yourself."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:22
+msgid ""
+"The main point of these labs is the design principle not programming "
+"languages. Hence, you are free to choose any programming languages such "
+"as ASM/C/C++/Rust. However, there are a lot of things which are language "
+"dependent and even compiler dependent. You need to manage them yourself."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:27
+msgid ""
+"We use ``aarch64-linux-gnu-`` toolchain and C to develop. If you choose "
+"other toolchain or programming languages, we might not help you."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:30
+msgid "There are 5 types of labels appear in each lab."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:33
+msgid "``required``"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:33
+msgid ""
+"You're required to implement it by the description, they take up major of"
+" your scores."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:34
+msgid "``elective``"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:34
+msgid "You're supposed to choose some of them to get full credit."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:35
+msgid "``question``"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:35
+msgid ""
+"During the demo, you need to answer the question correctly to get full "
+"score."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:36
+msgid "``bonus``"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:36
+msgid "It's not required. You can still implement it and get a bonus."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:47
+msgid ""
+"Students who register this course will get a rpi3, a 5.1V 2.5A power "
+"supply, a USB-TTL cable, a micro SD card, and an SD card reader."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:49
+msgid ""
+"We don't expect every student to have experience in embedded system or "
+"microcontroller. So, the hardware information needed by labs will be "
+"provided. You can check them when you need them."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:54
+msgid "Disclaimer"
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:55
+msgid ""
+"We're not kernel developers or experienced embedded developers. It's "
+"common we made mistakes in the description. If you find any of them, send"
+" an issue to the course github."
+msgstr ""
+
+#: /home/me/osdi2020/docs/index.rst:60
+msgid ""
+"This documentation is not well self-contained, you can get more "
+"information from external references."
+msgstr ""
+

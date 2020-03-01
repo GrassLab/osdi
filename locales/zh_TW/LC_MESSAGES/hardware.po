@@ -1,0 +1,50 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, Jim
+# This file is distributed under the same license as the nctuos package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nctuos \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-03-01 16:23+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: /home/me/osdi2020/docs/hardware/asm.rst:2
+msgid "The Assembly You Need"
+msgstr ""
+
+#: /home/me/osdi2020/docs/hardware/asm.rst:4
+msgid ""
+"Although this is not a course about assembly language, you still need to "
+"write some assembly in bare metal programming."
+msgstr ""
+
+#: /home/me/osdi2020/docs/hardware/asm.rst:7
+msgid ""
+"Here, we provide pieces of assembly code you possibly need. After copy "
+"and paste, you still need to look up the manual to understand how this "
+"codes work."
+msgstr ""
+
+#: /home/me/osdi2020/docs/hardware/asm.rst:12
+msgid ""
+"You might still need others to achieve some extra function. Please refer "
+"to this two manual for more information. "
+"https://static.docs.arm.com/100898/0100/the_a64_Instruction_set_100898_0100.pdf"
+" "
+"https://static.docs.arm.com/ddi0596/a/DDI_0596_ARM_a64_instruction_set_architecture.pdf"
+" https://static.docs.arm.com/ddi0487/ea/DDI0487E_a_armv8_arm.pdf"
+msgstr ""
+
+#: /home/me/osdi2020/docs/hardware/asm.rst:20
+msgid "Lab 0"
+msgstr ""
+
