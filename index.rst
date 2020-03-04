@@ -40,6 +40,7 @@ There are 3 types of labels appear in each lab.
   :hidden:
 
   labs/lab0
+  labs/lab1
 
 Hardware
 ---------
@@ -63,6 +64,7 @@ If you find any of them, send an issue to the course github.
   :hidden:
 
   hardware/asm
+  hardware/uart
 
 
 .. toctree::
