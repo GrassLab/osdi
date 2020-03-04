@@ -26,3 +26,37 @@ Lab 0
     wfe
     b _start
 
+Lab 1
+-----
+
+.. code-block:: c
+
+  // let core with cpuid != 0 enter busy loop
+  _start:
+  	mrs x0, mpidr_el1
+  	and x0, x0, 3
+  	cbz x0, 2f
+  1:
+  	wfe
+  	b 1b
+  2:
+
+.. code-block:: c
+
+  // set stack pointer and branch to main function.
+  2:
+  	ldr x0, = _stack_top
+  	mov sp, x0
+  	bl main
+  1:
+  	b 1b
+
+.. code-block:: c
+
+  // read frequency of core timer
+  mrs x0, cntfrq_el0
+
+.. code-block:: c
+
+  // read counts of core timer
+  mrs x0, cntpct_el0

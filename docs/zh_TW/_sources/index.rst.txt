@@ -16,7 +16,7 @@ Students can get their hands dirty on a **Real Machine** instead of an emulator.
 
 Labs
 ----
-There are 9 + 1 labs in this course.
+There are 8 + 1 labs in this course.
 You'll learn the concept of **design** of kernel by **implementing** it yourself.
 
 The main point of these labs is the design principle not programming languages.
@@ -27,13 +27,12 @@ You need to manage them yourself.
 We use ``aarch64-linux-gnu-`` toolchain and C to develop.
 If you choose other toolchain or programming languages, we might not help you.
 
-There are 5 types of labels appear in each lab.
+There are 3 types of labels appear in each lab.
 
 ================== ===========================================================================================
 ``required``       You're required to implement it by the description, they take up major of your scores.
-``elective``       You're supposed to choose some of them to get full credit.
+``elective``       You can implement some of them to get bonus.
 ``question``       During the demo, you need to answer the question correctly to get full score.
-``bonus``          It's not required. You can still implement it and get a bonus.
 ================== ===========================================================================================
 
 .. toctree::
@@ -41,6 +40,7 @@ There are 5 types of labels appear in each lab.
   :hidden:
 
   labs/lab0
+  labs/lab1
 
 Hardware
 ---------
@@ -64,6 +64,7 @@ If you find any of them, send an issue to the course github.
   :hidden:
 
   hardware/asm
+  hardware/uart
 
 
 .. toctree::

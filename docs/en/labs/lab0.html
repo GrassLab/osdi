@@ -21,10 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -35,7 +36,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="next" title="Lab 1 : Hello World" href="lab1.html" />
     <link rel="prev" title="NCTU, Operating System Design &amp; Implementation, Spring 2020" href="../index.html" /> 
 </head>
 
@@ -111,10 +112,12 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscs</span></p>
 <ul>
@@ -313,13 +316,13 @@ You can use objcopy to translate elf to raw binary.</p>
 <li><p>A FAT16/32 partition contains</p>
 <ul>
 <li><p>Firmware for GPU</p></li>
-<li><p>Kernel image</p></li>
+<li><p>Kernel image (kernel8.img)</p></li>
 </ul>
 </li>
 </ul>
 <p>There are two ways to do it.</p>
 <ol class="arabic">
-<li><p>We already prepared a bootable image.
+<li><p>We already prepared a <a class="reference external" href="https://github.com/GrassLab/osdi/raw/master/supplement/nctuos.img">bootable image</a>.
 You can use the following command to flash it to your sd card.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>dd if=nctuos.img of=/dev/sdb
 </pre></div>
@@ -349,7 +352,7 @@ More information about pi3’s booting could be checked on official website
 </div>
 <div class="section" id="interact-with-rpi3">
 <h3>Interact with rpi3<a class="headerlink" href="#interact-with-rpi3" title="Permalink to this headline">¶</a></h3>
-<p>Use the provided kernel8.img and connect TX, RX, GND to the corresponding pin on rpi3.
+<p>Use the provided <a class="reference external" href="https://github.com/GrassLab/osdi/raw/master/supplement/kernel8.img">kernel8.img</a> and connect TX, RX, GND to the corresponding pin on rpi3.
 After power on, you can read and write data from /dev/ttyUSB0 (Linux).
 You can use putty or screen with baud rate 115200 to interact with your rpi3.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>screen /dev/ttyUSB0 115200
@@ -394,7 +397,7 @@ We don’t provide JTAG in this course, you can try it if you have one.
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="lab1.html" class="btn btn-neutral float-right" title="Lab 1 : Hello World" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../index.html" class="btn btn-neutral float-left" title="NCTU, Operating System Design &amp; Implementation, Spring 2020" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -21,11 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script type="text/javascript" src="../_static/translations.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -36,8 +37,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜尋" href="../search.html" />
-    <link rel="next" title="Exteral Reference" href="../external_reference/index.html" />
-    <link rel="prev" title="Lab 0: Environment Setup" href="../labs/lab0.html" /> 
+    <link rel="next" title="UART" href="uart.html" />
+    <link rel="prev" title="Lab 1 : Hello World" href="../labs/lab1.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,13 +85,16 @@
               <p class="caption"><span class="caption-text">Labs</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab1.html">Lab 1 : Hello World</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The Assembly You Need</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#lab-0">Lab 0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-1">Lab 1</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscs</span></p>
 <ul>
@@ -182,6 +186,37 @@ Please refer to this two manual for more information.
 </pre></div>
 </div>
 </div>
+<div class="section" id="lab-1">
+<h2>Lab 1<a class="headerlink" href="#lab-1" title="本標題的永久連結">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// let core with cpuid != 0 enter busy loop</span>
+<span class="nl">_start</span><span class="p">:</span>
+      <span class="n">mrs</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mpidr_el1</span>
+      <span class="n">and</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="mi">3</span>
+      <span class="n">cbz</span> <span class="n">x0</span><span class="p">,</span> <span class="mf">2f</span>
+<span class="mi">1</span><span class="o">:</span>
+      <span class="n">wfe</span>
+      <span class="n">b</span> <span class="mi">1</span><span class="n">b</span>
+<span class="mi">2</span><span class="o">:</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// set stack pointer and branch to main function.</span>
+<span class="mi">2</span><span class="o">:</span>
+      <span class="n">ldr</span> <span class="n">x0</span><span class="p">,</span> <span class="o">=</span> <span class="n">_stack_top</span>
+      <span class="n">mov</span> <span class="n">sp</span><span class="p">,</span> <span class="n">x0</span>
+      <span class="n">bl</span> <span class="n">main</span>
+<span class="mi">1</span><span class="o">:</span>
+      <span class="n">b</span> <span class="mi">1</span><span class="n">b</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// read frequency of core timer</span>
+<span class="n">mrs</span> <span class="n">x0</span><span class="p">,</span> <span class="n">cntfrq_el0</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// read counts of core timer</span>
+<span class="n">mrs</span> <span class="n">x0</span><span class="p">,</span> <span class="n">cntpct_el0</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -192,10 +227,10 @@ Please refer to this two manual for more information.
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../external_reference/index.html" class="btn btn-neutral float-right" title="Exteral Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="uart.html" class="btn btn-neutral float-right" title="UART" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../labs/lab0.html" class="btn btn-neutral float-left" title="Lab 0: Environment Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../labs/lab1.html" class="btn btn-neutral float-left" title="Lab 1 : Hello World" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

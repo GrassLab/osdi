@@ -150,12 +150,13 @@ To prepare a bootable image for rpi3, you have to prepare at least the following
 
   * Firmware for GPU
 
-  * Kernel image
+  * Kernel image (kernel8.img)
 
 There are two ways to do it.
 
 1. 
-  We already prepared a bootable image.
+  We already prepared a `bootable image
+  <https://github.com/GrassLab/osdi/raw/master/supplement/nctuos.img>`_.
   You can use the following command to flash it to your sd card.
 
   .. code-block:: none
@@ -187,7 +188,7 @@ There are two ways to do it.
 
 Interact with rpi3
 ------------------
-Use the provided kernel8.img and connect TX, RX, GND to the corresponding pin on rpi3.
+Use the provided `kernel8.img <https://github.com/GrassLab/osdi/raw/master/supplement/kernel8.img>`_ and connect TX, RX, GND to the corresponding pin on rpi3.
 After power on, you can read and write data from /dev/ttyUSB0 (Linux).
 You can use putty or screen with baud rate 115200 to interact with your rpi3.
 
