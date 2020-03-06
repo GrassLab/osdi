@@ -77,6 +77,9 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 
 ``elective`` Add <timestamp> command, it print current timestamp.
 
+.. note::
+  You don't need floating point to represent a fraction number, try to print it just by modulo and division of integer
+
 Reboot
 ======
 
