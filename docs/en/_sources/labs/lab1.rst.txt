@@ -78,7 +78,7 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 ``elective`` Add <timestamp> command, it print current timestamp.
 
 .. note::
-  You don't need floating point to represent a fraction number, try to print it just by modulo and division of integer
+  Fraction could be represent by two integer part without using floating point.
 
 Reboot
 ======
@@ -99,8 +99,8 @@ You can follow example code to reset your rpi3.
   }
 
   void cancel_reset() {
-    PM_MAP.RSTC = PM_PASSWORD | 0;
-    PM_MAP.WDOG = PM_PASSWORD | 0;
+    set(PM_RSTC, PM_PASSWORD | 0); // full reset
+    set(PM_WDOG, PM_PASSWORD | 0); // number of watchdog tick
   }
 
 

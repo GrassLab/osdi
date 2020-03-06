@@ -240,7 +240,7 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 <p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Add &lt;timestamp&gt; command, it print current timestamp.</p>
 <div class="admonition note">
 <p class="admonition-title">備註</p>
-<p>You don’t need floating point to represent a fraction number, try to print it just by modulo and division of integer</p>
+<p>Fraction could be represent by two integer part without using floating point.</p>
 </div>
 </div>
 <div class="section" id="reboot">
@@ -257,8 +257,8 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 <span class="p">}</span>
 
 <span class="kt">void</span> <span class="nf">cancel_reset</span><span class="p">()</span> <span class="p">{</span>
-  <span class="n">PM_MAP</span><span class="p">.</span><span class="n">RSTC</span> <span class="o">=</span> <span class="n">PM_PASSWORD</span> <span class="o">|</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="n">PM_MAP</span><span class="p">.</span><span class="n">WDOG</span> <span class="o">=</span> <span class="n">PM_PASSWORD</span> <span class="o">|</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">PM_RSTC</span><span class="p">,</span> <span class="n">PM_PASSWORD</span> <span class="o">|</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// full reset</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">PM_WDOG</span><span class="p">,</span> <span class="n">PM_PASSWORD</span> <span class="o">|</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// number of watchdog tick</span>
 <span class="p">}</span>
 </pre></div>
 </div>
