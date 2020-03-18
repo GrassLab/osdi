@@ -41,6 +41,7 @@ There are 3 types of labels appear in each lab.
 
   labs/lab0
   labs/lab1
+  labs/lab2
 
 Hardware
 ---------
@@ -65,6 +66,7 @@ If you find any of them, send an issue to the course github.
 
   hardware/asm
   hardware/uart
+  hardware/mailbox
 
 
 .. toctree::

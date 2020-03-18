@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 2 : Bootloader &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜尋" href="../search.html" />
+    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="prev" title="Lab 1 : Hello World" href="lab1.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 2 : Bootloader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goal-of-this-lab">Goal of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mailbox">Mailbox</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-the-hardware-s-information">Get the hardware’s information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pl011-uart">PL011 UART</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#splash">Splash</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#load-kernel-image">Load kernel image</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rpi3-boot-flow">Rpi3 boot flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#your-3rd-stage-bootloader">Your 3rd stage bootloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#load-by-uart">Load by UART</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#load-to-certain-address">Load to certain address</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/mailbox.html">Mailbox</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 2 : Bootloader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab2.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-2-bootloader">
+<h1>Lab 2 : Bootloader<a class="headerlink" href="#lab-2-bootloader" title="本標題的永久連結">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="本標題的永久連結">¶</a></h2>
+<p>You practiced bare metal programming in Lab 1.
+Every time recompiling the kernel image, it’s mandatory to copy it to the SD card and place it into rpi3.
+This procedure is quite annoying.</p>
+<p>A more convenient way to load the recompiled kernel without touching the SD card could be achieved by UART.</p>
+<p>In this lab, you need to implement a bootloader that can load image kernel image by UART.
+Besides, you’ll learn how to communicate with GPU by mailbox.</p>
+</div>
+<div class="section" id="goal-of-this-lab">
+<h2>Goal of this lab<a class="headerlink" href="#goal-of-this-lab" title="本標題的永久連結">¶</a></h2>
+<ul class="simple">
+<li><p>Understand and use mailbox to call functions from GPU.</p></li>
+<li><p>Implement a bootloader that can load kernel image by UART.</p></li>
+</ul>
+</div>
+<div class="section" id="mailbox">
+<h2>Mailbox<a class="headerlink" href="#mailbox" title="本標題的永久連結">¶</a></h2>
+<p>ARM CPU is able to configure peripherals such as clock rate and framebuffer by calling VideoCoreIV(GPU) routines.
+Mailboxes are the communication bridge between them.</p>
+<p>You can refer to <a class="reference internal" href="../hardware/mailbox.html#mailbox"><span class="std std-ref">Mailbox</span></a> for more information.</p>
+<div class="section" id="get-the-hardware-s-information">
+<h3>Get the hardware’s information<a class="headerlink" href="#get-the-hardware-s-information" title="本標題的永久連結">¶</a></h3>
+<p>Get the hardware’s information is the easiest thing could be done by mailbox.
+Check if you implement mailbox communication correctly by verifying the hardware information’s correctness.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Get the hardware’s information by mailbox and print them, you should at least print <strong>board revision</strong> and <strong>VC Core base address</strong>.</p>
+</div>
+<div class="section" id="pl011-uart">
+<h3>PL011 UART<a class="headerlink" href="#pl011-uart" title="本標題的永久連結">¶</a></h3>
+<p>Mini UART’s clock is based on system clock.
+PL011 UART has it’s own seperate clock.
+You can get and set UART’s clock rate by mailbox.
+After that, you can set baud rate register according to UART’s base clock rate.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Get or set UART clock by mailbox and replace mini UART by PL011 UART.</p>
+</div>
+<div class="section" id="splash">
+<h3>Splash<a class="headerlink" href="#splash" title="本標題的永久連結">¶</a></h3>
+<p>During booting process, it’s common to show some splash image to please user.
+You can set GPU’s framebuffer by mailbox to control your display output easily.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Set framebuffer by mailbox to show a splash image, show the result by qemu.</p>
+<p><em>Example splash image on qemu.</em></p>
+<img alt="../_images/lab2_1.png" src="../_images/lab2_1.png" />
+</div>
+</div>
+<div class="section" id="load-kernel-image">
+<h2>Load kernel image<a class="headerlink" href="#load-kernel-image" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="rpi3-boot-flow">
+<h3>Rpi3 boot flow<a class="headerlink" href="#rpi3-boot-flow" title="本標題的永久連結">¶</a></h3>
+<p>Rpi3’s booting procedure could be roughly divided into 4 steps.</p>
+<ol class="arabic simple">
+<li><p>GPU executes the first stage bootloader from ROM on the SoC.</p></li>
+<li><p>The first stage bootloader recognizes the FAT16/32 file system and loads the second stage bootloader bootcode.bin from SD card to L2 cache.</p></li>
+<li><p>bootcode.bin initializes SDRAM and loads start.elf</p></li>
+<li><p>start.elf initializes GPU’s firmware and reads config.txt, cmdline.txt and kernel8.img to start OS.</p></li>
+</ol>
+<p>Beside above SD card booting, rpi3 also provides several <a class="reference external" href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/">boot modes</a>.
+You can also let rpi3’s bootloader load another bootloader such as <a class="reference external" href="https://elinux.org/RPi_U-Boot">u-boot</a>
+as your <strong>third stage bootloader</strong> to load kernel in diverse ways.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span></code> In x86 machine, how the above 4 steps are implemented? Roughly describe it.</p>
+</div>
+<div class="section" id="your-3rd-stage-bootloader">
+<h3>Your 3rd stage bootloader<a class="headerlink" href="#your-3rd-stage-bootloader" title="本標題的永久連結">¶</a></h3>
+<p>Different from the previous stage bootloaders running on rpi3’s GPU,
+the 3rd stage bootloader is loaded by GPU and runs on rpi3’s CPU.</p>
+<p>You’re going to implement your own 3rd stage bootloader.
+To make it loadable by GPU, it should also be default <strong>named as kernel8.img and loaded at 0x80000</strong>.</p>
+<div class="section" id="load-by-uart">
+<h4>Load by UART<a class="headerlink" href="#load-by-uart" title="本標題的永久連結">¶</a></h4>
+<p>Although UART is not a good way to transfer massive data, we still recommend you to load your kernel image by UART because</p>
+<ol class="arabic simple">
+<li><p>Your kernel image is not very big, UART is fast enough to load it in seconds.</p></li>
+<li><p>It’s easy to use and you’ve already implemented one.</p></li>
+<li><p>Only one USB-TTL cable is needed for both communicating with host and loading kernel image.</p></li>
+</ol>
+<p>UART rarely drops data if you implement your loader correctly.
+So, you don’t need a very complicate protocol during data transfer.
+It’s also fine to ask users to resend again if some error happens during loading.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Implement bootloader can load kernel image by UART.</p>
+<img alt="../_images/lab2_0.gif" src="../_images/lab2_0.gif" />
+<p><code class="docutils literal notranslate"><span class="pre">question</span></code> Calculate how long will it take for loading a 10MB kernel image by UART if baud rate is 115200.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You might wondering how to test this functionality on QEMU.
+You can use <code class="docutils literal notranslate"><span class="pre">qemu-system-aarch64</span> <span class="pre">-serial</span> <span class="pre">pty</span></code> (PL011 UART) or <code class="docutils literal notranslate"><span class="pre">qemu-system-aarch64</span> <span class="pre">-serial</span> <span class="pre">null</span> <span class="pre">-serial</span> <span class="pre">pty</span></code> (Mini UART) to create a pseudo TTY device, and use screen to monitor it.</p>
+</div>
+</div>
+<div class="section" id="load-to-certain-address">
+<h4>Load to certain address<a class="headerlink" href="#load-to-certain-address" title="本標題的永久連結">¶</a></h4>
+<p>Sometimes, the kernel image should be loaded to a certain address.
+You could provide an option for users to choose the loading address.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>Kernel image’s loading address might overlap your bootloader.
+Your code should be correct in this case.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> User can specify the kernel image’s loading address.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lab1.html" class="btn btn-neutral float-left" title="Lab 1 : Hello World" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

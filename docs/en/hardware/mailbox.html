@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Mailbox &mdash; nctuos 0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exteral Reference" href="../external_reference/index.html" />
+    <link rel="prev" title="UART" href="uart.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab2.html">Lab 2 : Bootloader</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mailbox</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basics">Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tag">Tag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#framebuffer">Framebuffer</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Mailbox</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/hardware/mailbox.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mailbox">
+<span id="id1"></span><h1>Mailbox<a class="headerlink" href="#mailbox" title="Permalink to this headline">¶</a></h1>
+<p>Mailbox is a communication mechanism  between ARM and VideoCoreIV GPU.
+You can use it to set framebuffer or configure some peripherals.</p>
+<p>We only list the materials needed for the labs.
+For details, please refer to <a class="reference external" href="https://github.com/raspberrypi/firmware/wiki/Mailboxes">https://github.com/raspberrypi/firmware/wiki/Mailboxes</a></p>
+<div class="section" id="basics">
+<h2>Basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h2>
+<p>The mailbox mechanism consists of three components mailbox registers, channels, and messages.</p>
+<p><strong>Mailbox registers</strong></p>
+<p>Mailbox registers are accessed by MMIO, we only need Mailbox 0 Read/Write (CPU read from GPU),
+Mailbox 0 status (check GPU status) and Mailbox 1 Read/Write(CPU write to GPU)</p>
+<p><strong>Channels</strong></p>
+<p>Mailbox 0 define several channels, but we only use channel 8 (CPU-&gt;GPU) for communication.</p>
+<p><strong>Message</strong></p>
+<p>To pass messages by the mailbox, you need to prepare a message array.
+Then apply the following steps.</p>
+<ol class="arabic simple">
+<li><p>Combine the message address (upper 28 bits) with channel number (lower 4 bits)</p></li>
+<li><p>Check if Mailbox 0 status register’s full flag is set.</p></li>
+<li><p>If not, then you can write to Mailbox 1 Read/Write register.</p></li>
+<li><p>Check if Mailbox 0 status register’s empty flag is set.</p></li>
+<li><p>If not, then you can read from Mailbox 0 Read/Write register.</p></li>
+<li><p>Check if the value is the same as you wrote in step 1.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Because only upper 28 bits of message address could be passed, the message array should be correctly aligned.</p>
+</div>
+<p><strong>mailbox address and flags</strong></p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define MMIO_BASE       0x3f000000</span>
+<span class="cp">#define MAILBOX_BASE    MMIO_BASE + 0xb880</span>
+
+<span class="cp">#define MAILBOX_READ    MAILBOX_BASE</span>
+<span class="cp">#define MAILBOX_STATUS  MAILBOX_BASE + 0x18</span>
+<span class="cp">#define MAILBOX_WRITE   MAILBOX_BASE + 0x20</span>
+
+<span class="cp">#define MAILBOX_EMPTY   0x40000000</span>
+<span class="cp">#define MAILBOX_FULL    0x80000000</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tag">
+<h2>Tag<a class="headerlink" href="#tag" title="Permalink to this headline">¶</a></h2>
+<p>Mailbox property interface(channel 8, 9) contains several tags to indicate different operations.
+You should refer to <a class="reference external" href="https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface">https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface</a>
+to get detail specifications.</p>
+<p>Below, we provide an example to get rpi3’s board revision number.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define GET_BOARD_REVISION  0x00010002</span>
+<span class="cp">#define REQUEST_CODE        0x00000000</span>
+<span class="cp">#define REQUEST_SUCCEED     0x80000000</span>
+<span class="cp">#define REQUEST_FAILED      0x80000001</span>
+<span class="cp">#define TAG_REQUEST_CODE    0x00000000</span>
+<span class="cp">#define END_TAG             0x00000000</span>
+
+<span class="kt">void</span> <span class="nf">get_board_revision</span><span class="p">(){</span>
+  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">mailbox</span><span class="p">[</span><span class="mi">7</span><span class="p">];</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">7</span> <span class="o">*</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// buffer size in bytes</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">REQUEST_CODE</span><span class="p">;</span>
+  <span class="c1">// tags begin</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">GET_BOARD_REVISION</span><span class="p">;</span> <span class="c1">// tag identifier</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// maximum of request and response value buffer&#39;s length.</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">TAG_REQUEST_CODE</span><span class="p">;</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// value buffer</span>
+  <span class="c1">// tags end</span>
+  <span class="n">mailbox</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">END_TAG</span><span class="p">;</span>
+
+  <span class="n">mailbox_call</span><span class="p">(</span><span class="n">mailbox</span><span class="p">);</span> <span class="c1">// message passing procedure call, you should implement it following the 6 steps provided above.</span>
+
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;0x%x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">mailbox</span><span class="p">[</span><span class="mi">5</span><span class="p">]);</span> <span class="c1">// it should be 0xa020d3 for rpi3 b+</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="framebuffer">
+<h2>Framebuffer<a class="headerlink" href="#framebuffer" title="Permalink to this headline">¶</a></h2>
+<p>Rpi3 has a display output which controlled by GPU.
+You can set GPU’s framebuffer by mailbox to show an image or text on your screen.</p>
+<p>There are several items to configure.
+I list some of them with brief explanations.
+You should experiment in different configurations on real rpi3 to get a better understanding.</p>
+<ul>
+<li><p><strong>Allocate buffer:</strong>
+To get the framebuffer’s memory base address.
+Then you can set pixel’s color according to its address.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The buffer address returned by GPU should be bitwise AND with 0x3fff_ffff.</p>
+</div>
+</li>
+<li><p><strong>Physical (display) width/height:</strong>
+The display buffer size.</p></li>
+<li><p><strong>Virtual (buffer) width/height:</strong>
+A portion of framebuffer that sends to display.</p></li>
+<li><p><strong>Virtual (buffer) offset:</strong>
+The virtual buffer’s size might be bigger than the display buffer’s size, an offset is used to decide which part of the virtual buffer is sent to display.</p></li>
+<li><p><strong>Depth:</strong>
+How many bits to represent a pixel.</p></li>
+<li><p><strong>Pixel order:</strong>
+Pixel order is either RGB or BGR.</p></li>
+<li><p><strong>Get pitch:</strong>
+Pitch is how many bytes stores per horizontal line.
+For drawing k’th row in the screen, you need to skip k times pitch instead of k times display width.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../external_reference/index.html" class="btn btn-neutral float-right" title="Exteral Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="uart.html" class="btn btn-neutral float-left" title="UART" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Exteral Reference" href="../external_reference/index.html" />
+    <link rel="next" title="Mailbox" href="mailbox.html" />
     <link rel="prev" title="The Assembly You Need" href="asm.html" /> 
 </head>
 
@@ -85,6 +85,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab0.html">Lab 0: Environment Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab2.html">Lab 2 : Bootloader</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul class="current">
@@ -93,8 +94,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#mmio">MMIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gpio">GPIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#mini-uart">mini UART</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pl011-uart">PL011 UART</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="mailbox.html">Mailbox</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscs</span></p>
 <ul>
@@ -228,6 +231,30 @@ Then mini UART register can be accessed.</p></li>
 If you want to use UART1 (mini UART) use flag <code class="docutils literal notranslate"><span class="pre">-serial</span> <span class="pre">null</span> <span class="pre">-serial</span> <span class="pre">stdio</span></code></p>
 </div>
 </div>
+<div class="section" id="pl011-uart">
+<h2>PL011 UART<a class="headerlink" href="#pl011-uart" title="Permalink to this headline">¶</a></h2>
+<p>To use PL011 UART, you should set up the clock for it first.
+It’s configured by <a class="reference internal" href="mailbox.html#mailbox"><span class="std std-ref">Mailbox</span></a>.</p>
+<p>Besides the clock configuration, it’s similar to mini UART.</p>
+<p><strong>Setup</strong></p>
+<ol class="arabic simple">
+<li><p>Configure the UART clock frequency by mailbox.</p></li>
+<li><p>Enable GPIO (almost same as mini UART).</p></li>
+<li><p>Set IBRD and FBRD to configure baud rate.</p></li>
+<li><p>Set LCRH to configure line control.</p></li>
+<li><p>Set CR to enable UART.</p></li>
+</ol>
+<p><strong>Read data</strong></p>
+<ol class="arabic simple">
+<li><p>Check FR</p></li>
+<li><p>Read from DR</p></li>
+</ol>
+<p><strong>Write data</strong></p>
+<ol class="arabic simple">
+<li><p>Check FR</p></li>
+<li><p>Write to DR</p></li>
+</ol>
+</div>
 </div>
 
 
@@ -238,7 +265,7 @@ If you want to use UART1 (mini UART) use flag <code class="docutils literal notr
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../external_reference/index.html" class="btn btn-neutral float-right" title="Exteral Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="mailbox.html" class="btn btn-neutral float-right" title="Mailbox" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="asm.html" class="btn btn-neutral float-left" title="The Assembly You Need" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
