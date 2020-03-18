@@ -78,3 +78,35 @@ It supports limited functions for UART.
 .. note::
   By default, QEMU uses UART0 (PL011 UART) as serial io. 
   If you want to use UART1 (mini UART) use flag ``-serial null -serial stdio``
+
+PL011 UART
+----------
+
+To use PL011 UART, you should set up the clock for it first.
+It's configured by :ref:`mailbox`.
+
+Besides the clock configuration, it's similar to mini UART.
+
+**Setup**
+
+1. Configure the UART clock frequency by mailbox.
+
+2. Enable GPIO (almost same as mini UART).
+
+3. Set IBRD and FBRD to configure baud rate.
+
+4. Set LCRH to configure line control.
+
+5. Set CR to enable UART.
+
+**Read data**
+
+1. Check FR
+
+2. Read from DR
+
+**Write data**
+
+1. Check FR
+
+2. Write to DR
