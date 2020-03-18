@@ -197,15 +197,15 @@ After that, 4 CPU cores start to run the same code simultaneously.</p>
 <li><p>Initialize the BSS segment.</p></li>
 <li><p>Set the stack pointer to an appropriate position.</p></li>
 </ol>
-<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Implement the 3 basic steps.</p>
-<p><code class="docutils literal notranslate"><span class="pre">question</span></code> Is it reasonable to accelerate booting speed by parallel programming during the initialization stage?</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1</span></code> Implement the 3 basic steps.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> Is it reasonable to accelerate booting speed by parallel programming during the initialization stage?</p>
 </div>
 <div class="section" id="mini-uart">
 <h2>Mini UART<a class="headerlink" href="#mini-uart" title="本標題的永久連結">¶</a></h2>
 <p>You’ll use UART as a bridge between rpi3 and host computer for all the labs.
 rpi3 has 2 different UARTs, mini UART and PL011 UART.
 In this lab, you need to set up mini UART.</p>
-<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Following <a class="reference internal" href="../hardware/uart.html#uart"><span class="std std-ref">UART</span></a> to set up mini UART.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2</span></code> Following <a class="reference internal" href="../hardware/uart.html#uart"><span class="std std-ref">UART</span></a> to set up mini UART.</p>
 </div>
 <div class="section" id="simple-shell">
 <h2>Simple Shell<a class="headerlink" href="#simple-shell" title="本標題的永久連結">¶</a></h2>
@@ -230,8 +230,8 @@ The shell should be able to execute the following commands.</p>
 </tr>
 </tbody>
 </table>
-<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Implement a simple shell, it should support the following commands.</p>
-<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Write a program or script on your host computer which can read a text file and write the content to rpi3.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3</span></code> Implement a simple shell, it should support the following commands.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Write a program or script on your host computer which can read a text file and write the content to rpi3.</p>
 </div>
 <div class="section" id="get-time">
 <h2>Get time<a class="headerlink" href="#get-time" title="本標題的永久連結">¶</a></h2>
@@ -239,7 +239,7 @@ The shell should be able to execute the following commands.</p>
 Try to get time by getting core timer counter and frequency from registers CNTFRQ_EL0 and CNTPCT_EL0.</p>
 <div class="math notranslate nohighlight">
 \[\text{time} = \frac{\text{timer counter}}{\text{timer frequency}}\]</div>
-<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Add &lt;timestamp&gt; command, it print current timestamp.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2</span></code> Add &lt;timestamp&gt; command, it print current timestamp.</p>
 <div class="admonition note">
 <p class="admonition-title">備註</p>
 <p>Fraction could be represent by two integer part without using floating point.</p>
@@ -264,7 +264,7 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 <span class="p">}</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Add &lt;reboot&gt; command.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3</span></code> Add &lt;reboot&gt; command.</p>
 <div class="admonition note">
 <p class="admonition-title">備註</p>
 <p>This snippet of code only works on real rpi3, not on QEMU.</p>
@@ -278,7 +278,7 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 <h2>Result<a class="headerlink" href="#result" title="本標題的永久連結">¶</a></h2>
 <img alt="../_images/lab1_0.gif" src="../_images/lab1_0.gif" />
 <img alt="../_images/lab1_1.gif" src="../_images/lab1_1.gif" />
-<p><code class="docutils literal notranslate"><span class="pre">question</span></code> Point out the difference between  bare-metal programming and programming on top of operating system.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> Point out the difference between  bare-metal programming and programming on top of operating system.</p>
 </div>
 </div>
 

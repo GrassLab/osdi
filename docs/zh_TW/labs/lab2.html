@@ -207,7 +207,7 @@ Mailboxes are the communication bridge between them.</p>
 <h3>Get the hardware’s information<a class="headerlink" href="#get-the-hardware-s-information" title="本標題的永久連結">¶</a></h3>
 <p>Get the hardware’s information is the easiest thing could be done by mailbox.
 Check if you implement mailbox communication correctly by verifying the hardware information’s correctness.</p>
-<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Get the hardware’s information by mailbox and print them, you should at least print <strong>board revision</strong> and <strong>VC Core base address</strong>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1</span></code> Get the hardware’s information by mailbox and print them, you should at least print <strong>board revision</strong> and <strong>VC Core base address</strong>.</p>
 </div>
 <div class="section" id="pl011-uart">
 <h3>PL011 UART<a class="headerlink" href="#pl011-uart" title="本標題的永久連結">¶</a></h3>
@@ -215,13 +215,13 @@ Check if you implement mailbox communication correctly by verifying the hardware
 PL011 UART has it’s own seperate clock.
 You can get and set UART’s clock rate by mailbox.
 After that, you can set baud rate register according to UART’s base clock rate.</p>
-<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Get or set UART clock by mailbox and replace mini UART by PL011 UART.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Get or set UART clock by mailbox and replace mini UART by PL011 UART.</p>
 </div>
 <div class="section" id="splash">
 <h3>Splash<a class="headerlink" href="#splash" title="本標題的永久連結">¶</a></h3>
 <p>During booting process, it’s common to show some splash image to please user.
 You can set GPU’s framebuffer by mailbox to control your display output easily.</p>
-<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> Set framebuffer by mailbox to show a splash image, show the result by qemu.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2</span></code> Set framebuffer by mailbox to show a splash image, show the result by qemu.</p>
 <p><em>Example splash image on qemu.</em></p>
 <img alt="../_images/lab2_1.png" src="../_images/lab2_1.png" />
 </div>
@@ -240,7 +240,7 @@ You can set GPU’s framebuffer by mailbox to control your display output easily
 <p>Beside above SD card booting, rpi3 also provides several <a class="reference external" href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/">boot modes</a>.
 You can also let rpi3’s bootloader load another bootloader such as <a class="reference external" href="https://elinux.org/RPi_U-Boot">u-boot</a>
 as your <strong>third stage bootloader</strong> to load kernel in diverse ways.</p>
-<p><code class="docutils literal notranslate"><span class="pre">question</span></code> In x86 machine, how the above 4 steps are implemented? Roughly describe it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> In x86 machine, how the above 4 steps are implemented? Roughly describe it.</p>
 </div>
 <div class="section" id="your-3rd-stage-bootloader">
 <h3>Your 3rd stage bootloader<a class="headerlink" href="#your-3rd-stage-bootloader" title="本標題的永久連結">¶</a></h3>
@@ -259,9 +259,9 @@ To make it loadable by GPU, it should also be default <strong>named as kernel8.i
 <p>UART rarely drops data if you implement your loader correctly.
 So, you don’t need a very complicate protocol during data transfer.
 It’s also fine to ask users to resend again if some error happens during loading.</p>
-<p><code class="docutils literal notranslate"><span class="pre">required</span></code> Implement bootloader can load kernel image by UART.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2</span></code> Implement bootloader can load kernel image by UART.</p>
 <img alt="../_images/lab2_0.gif" src="../_images/lab2_0.gif" />
-<p><code class="docutils literal notranslate"><span class="pre">question</span></code> Calculate how long will it take for loading a 10MB kernel image by UART if baud rate is 115200.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> Calculate how long will it take for loading a 10MB kernel image by UART if baud rate is 115200.</p>
 <div class="admonition note">
 <p class="admonition-title">備註</p>
 <p>You might wondering how to test this functionality on QEMU.
@@ -277,7 +277,7 @@ You could provide an option for users to choose the loading address.</p>
 <p>Kernel image’s loading address might overlap your bootloader.
 Your code should be correct in this case.</p>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">elective</span></code> User can specify the kernel image’s loading address.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3</span></code> User can specify the kernel image’s loading address.</p>
 </div>
 </div>
 </div>
