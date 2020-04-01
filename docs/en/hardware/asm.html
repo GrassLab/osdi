@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="UART" href="uart.html" />
-    <link rel="prev" title="Lab 2 : Bootloader" href="../labs/lab2.html" /> 
+    <link rel="prev" title="Lab 3 : Exception and Interrupt" href="../labs/lab3.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab0.html">Lab 0: Environment Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab1.html">Lab 1 : Hello World</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab3.html">Lab 3 : Exception and Interrupt</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul class="current">
@@ -93,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#lab-0">Lab 0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lab-1">Lab 1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lab-2">Lab 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-3">Lab 3</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uart.html">UART</a></li>
@@ -222,6 +224,138 @@ Please refer to this two manual for more information.
 <div class="section" id="lab-2">
 <h2>Lab 2<a class="headerlink" href="#lab-2" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="lab-3">
+<h2>Lab 3<a class="headerlink" href="#lab-3" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// enable interrupt</span>
+<span class="n">msr</span> <span class="n">DAIFClr</span><span class="p">,</span> <span class="mh">0xf</span>
+<span class="c1">// disable interrupt</span>
+<span class="n">msr</span> <span class="n">DAIFSet</span><span class="p">,</span> <span class="mh">0xf</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// supervisor call with ISS = 1</span>
+<span class="n">svc</span> <span class="mi">1</span>
+<span class="c1">// breakpoint with ISS = 1</span>
+<span class="n">brk</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// save general registers to stack</span>
+<span class="nl">save_all</span><span class="p">:</span>
+  <span class="n">sub</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">8</span>
+  <span class="n">stp</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">0</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x4</span><span class="p">,</span> <span class="n">x5</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x6</span><span class="p">,</span> <span class="n">x7</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x8</span><span class="p">,</span> <span class="n">x9</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">4</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x10</span><span class="p">,</span> <span class="n">x11</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">5</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x12</span><span class="p">,</span> <span class="n">x13</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">6</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x14</span><span class="p">,</span> <span class="n">x15</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">7</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x16</span><span class="p">,</span> <span class="n">x17</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">8</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x18</span><span class="p">,</span> <span class="n">x19</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x20</span><span class="p">,</span> <span class="n">x21</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">10</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x22</span><span class="p">,</span> <span class="n">x23</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">11</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x24</span><span class="p">,</span> <span class="n">x25</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">12</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x26</span><span class="p">,</span> <span class="n">x27</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">13</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x28</span><span class="p">,</span> <span class="n">x29</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">14</span><span class="p">]</span>
+  <span class="n">str</span> <span class="n">x30</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">15</span><span class="p">]</span>
+
+<span class="c1">// load general registers from stack</span>
+<span class="nl">load_all</span><span class="p">:</span>
+  <span class="n">ldp</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">0</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x4</span><span class="p">,</span> <span class="n">x5</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x6</span><span class="p">,</span> <span class="n">x7</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x8</span><span class="p">,</span> <span class="n">x9</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">4</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x10</span><span class="p">,</span> <span class="n">x11</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">5</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x12</span><span class="p">,</span> <span class="n">x13</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">6</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x14</span><span class="p">,</span> <span class="n">x15</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">7</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x16</span><span class="p">,</span> <span class="n">x17</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">8</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x18</span><span class="p">,</span> <span class="n">x19</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">9</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x20</span><span class="p">,</span> <span class="n">x21</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">10</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x22</span><span class="p">,</span> <span class="n">x23</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">11</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x24</span><span class="p">,</span> <span class="n">x25</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">12</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x26</span><span class="p">,</span> <span class="n">x27</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">13</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x28</span><span class="p">,</span> <span class="n">x29</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span> <span class="p">,</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">14</span><span class="p">]</span>
+  <span class="n">ldr</span> <span class="n">x30</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">15</span><span class="p">]</span>
+  <span class="n">add</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">8</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// load exception_table to vbar_el2</span>
+<span class="n">ldr</span> <span class="n">x0</span><span class="p">,</span> <span class="o">=</span><span class="n">exception_table</span>
+<span class="n">msr</span> <span class="n">vbar_el2</span><span class="p">,</span> <span class="n">x0</span>
+
+<span class="c1">// Simple vector table</span>
+<span class="p">.</span><span class="n">align</span> <span class="mi">11</span> <span class="c1">// vector table should be aligned to 0x800</span>
+<span class="p">.</span><span class="n">global</span> <span class="n">exception_table</span>
+<span class="nl">exception_table</span><span class="p">:</span>
+  <span class="n">b</span> <span class="n">exception_handler</span> <span class="c1">// branch to a handler function.</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span> <span class="c1">// entry size is 0x80, .align will pad 0</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+    <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="nl">from_el2_to_el1</span><span class="p">:</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">)</span> <span class="c1">// EL1 use aarch64</span>
+  <span class="n">msr</span> <span class="n">hcr_el2</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="mh">0x3c5</span> <span class="c1">// EL1h (SPSel = 1) with interrupt disabled</span>
+  <span class="n">msr</span> <span class="n">spsr_el2</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">adr</span> <span class="n">x0</span><span class="p">,</span> <span class="n">rest_initialization</span> <span class="c1">// load exception return address</span>
+  <span class="n">msr</span> <span class="n">elr_el2</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">adr</span> <span class="n">x0</span><span class="p">,</span> <span class="n">_stack_top</span> <span class="c1">// init sp for el1 option 1</span>
+  <span class="n">msr</span> <span class="n">sp_el1</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">eret</span> <span class="c1">// return to EL1</span>
+<span class="nl">rest_initialization</span><span class="p">:</span>
+  <span class="n">adr</span> <span class="n">x0</span><span class="p">,</span> <span class="n">_stack_top</span> <span class="c1">// init sp for el1 option 2</span>
+  <span class="n">mov</span> <span class="n">sp</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="p">...</span>
+<span class="nl">load_excepntion_table</span><span class="p">:</span>
+  <span class="n">adr</span> <span class="n">x0</span><span class="p">,</span> <span class="n">exception_table</span>
+  <span class="n">msr</span> <span class="n">vbar_el1</span><span class="p">,</span> <span class="n">x0</span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define USER_STACK 0x1000</span>
+
+<span class="nl">from_el1_to_el0</span><span class="p">:</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="n">USER_STACK</span>
+  <span class="n">msr</span> <span class="n">sp_el0</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="mi">0</span> <span class="c1">// EL0 with interrupt enabled</span>
+  <span class="n">msr</span> <span class="n">spsr_el1</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">adr</span> <span class="n">x0</span><span class="p">,</span> <span class="n">shell</span> <span class="c1">// return to shell run in EL0</span>
+  <span class="n">msr</span> <span class="n">elr_el1</span><span class="p">,</span> <span class="n">x0</span>
+  <span class="n">eret</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -235,7 +369,7 @@ Please refer to this two manual for more information.
         <a href="uart.html" class="btn btn-neutral float-right" title="UART" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../labs/lab2.html" class="btn btn-neutral float-left" title="Lab 2 : Bootloader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../labs/lab3.html" class="btn btn-neutral float-left" title="Lab 3 : Exception and Interrupt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

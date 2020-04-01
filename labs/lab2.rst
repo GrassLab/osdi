@@ -35,7 +35,7 @@ Get the hardware's information
 Get the hardware's information is the easiest thing could be done by mailbox.
 Check if you implement mailbox communication correctly by verifying the hardware information's correctness.
 
-``required`` Get the hardware's information by mailbox and print them, you should at least print **board revision** and **VC Core base address**.
+``required 1`` Get the hardware's information by mailbox and print them, you should at least print **board revision** and **VC Core base address**.
 
 PL011 UART
 ----------
@@ -45,7 +45,7 @@ PL011 UART has it's own seperate clock.
 You can get and set UART's clock rate by mailbox.
 After that, you can set baud rate register according to UART's base clock rate.
 
-``elective`` Get or set UART clock by mailbox and replace mini UART by PL011 UART.
+``elective 1`` Get or set UART clock by mailbox and replace mini UART by PL011 UART.
 
 Splash
 ------
@@ -53,7 +53,7 @@ Splash
 During booting process, it's common to show some splash image to please user.
 You can set GPU's framebuffer by mailbox to control your display output easily. 
 
-``elective`` Set framebuffer by mailbox to show a splash image, show the result by qemu.
+``elective 2`` Set framebuffer by mailbox to show a splash image, show the result by qemu.
 
 *Example splash image on qemu.*
 
@@ -79,7 +79,7 @@ Beside above SD card booting, rpi3 also provides several `boot modes <https://ww
 You can also let rpi3's bootloader load another bootloader such as `u-boot <https://elinux.org/RPi_U-Boot>`_
 as your **third stage bootloader** to load kernel in diverse ways.
 
-``question`` In x86 machine, how the above 4 steps are implemented? Roughly describe it.
+``question 1`` In x86 machine, how the above 4 steps are implemented? Roughly describe it.
 
 
 Your 3rd stage bootloader
@@ -107,11 +107,11 @@ UART rarely drops data if you implement your loader correctly.
 So, you don't need a very complicate protocol during data transfer.
 It's also fine to ask users to resend again if some error happens during loading.
 
-``required`` Implement bootloader can load kernel image by UART.
+``required 2`` Implement bootloader can load kernel image by UART.
 
 .. image:: img/lab2_0.gif
 
-``question`` Calculate how long will it take for loading a 10MB kernel image by UART if baud rate is 115200.
+``question 2`` Calculate how long will it take for loading a 10MB kernel image by UART if baud rate is 115200.
 
 .. note::
   You might wondering how to test this functionality on QEMU.
@@ -127,4 +127,4 @@ You could provide an option for users to choose the loading address.
   Kernel image's loading address might overlap your bootloader.
   Your code should be correct in this case.
 
-``elective`` User can specify the kernel image's loading address.
+``elective 3`` User can specify the kernel image's loading address.

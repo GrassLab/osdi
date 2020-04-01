@@ -75,6 +75,14 @@ It supports limited functions for UART.
 
 2. If set, write to AUX_MU_IO_REG
 
+**Interrupt**
+
+* AUX_MU_IER_REG: enable tx/rx interrupt
+
+* AUX_MU_IIR_REG: check interrupt cause
+
+* Interrupt enable register1(page 116 of manual): set 29 bit to enable. (AUX interrupt enable)
+
 .. note::
   By default, QEMU uses UART0 (PL011 UART) as serial io. 
   If you want to use UART1 (mini UART) use flag ``-serial null -serial stdio``
@@ -87,7 +95,7 @@ It's configured by :ref:`mailbox`.
 
 Besides the clock configuration, it's similar to mini UART.
 
-**Setup**
+**Setup(Lab1)**
 
 1. Configure the UART clock frequency by mailbox.
 
@@ -110,3 +118,18 @@ Besides the clock configuration, it's similar to mini UART.
 1. Check FR
 
 2. Write to DR
+
+**Interrupt**
+
+* IMSC: enable tx/rx interrupt
+
+* MIS: check interrupt cause 
+
+* ICR: clear interrupt (read or write DR will automatically clear)
+
+* Interrupt enable register2(page 117 of manual): set 25 bit to enable. (UART interrupt enable)
+
+.. warning::
+  qemu has a bug on PL011 UART's transmit interrupt.
+  According to manual, interrupt is set if transmit buffer is empty.
+  But in qemu, you need to send your first byte then the MIS register would function well.

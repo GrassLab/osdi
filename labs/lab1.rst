@@ -34,9 +34,9 @@ The following procedure is suggested to be done for basic initialization.
 3. Set the stack pointer to an appropriate position.
 
 
-``required`` Implement the 3 basic steps.
+``required 1`` Implement the 3 basic steps.
 
-``question`` Is it reasonable to accelerate booting speed by parallel programming during the initialization stage?
+``question 1`` Is it reasonable to accelerate booting speed by parallel programming during the initialization stage?
 
 
 Mini UART 
@@ -46,7 +46,7 @@ You'll use UART as a bridge between rpi3 and host computer for all the labs.
 rpi3 has 2 different UARTs, mini UART and PL011 UART.
 In this lab, you need to set up mini UART.
 
-``required`` Following :ref:`uart` to set up mini UART.
+``required 2`` Following :ref:`uart` to set up mini UART.
 
 Simple Shell
 ============
@@ -61,9 +61,9 @@ help     print all available commands
 hello    print Hello World!
 ======== ============================
 
-``required`` Implement a simple shell, it should support the following commands.
+``required 3`` Implement a simple shell, it should support the following commands.
 
-``elective`` Write a program or script on your host computer which can read a text file and write the content to rpi3.
+``elective 1`` Write a program or script on your host computer which can read a text file and write the content to rpi3.
 
 
 Get time
@@ -75,7 +75,7 @@ Try to get time by getting core timer counter and frequency from registers CNTFR
 .. math::
   \text{time} = \frac{\text{timer counter}}{\text{timer frequency}}
 
-``elective`` Add <timestamp> command, it print current timestamp.
+``elective 2`` Add <timestamp> command, it print current timestamp.
 
 .. note::
   Fraction could be represent by two integer part without using floating point.
@@ -104,7 +104,7 @@ You can follow example code to reset your rpi3.
   }
 
 
-``elective`` Add <reboot> command.
+``elective 3`` Add <reboot> command.
 
 .. note::
   This snippet of code only works on real rpi3, not on QEMU.
@@ -118,4 +118,4 @@ Result
 .. image:: img/lab1_0.gif
 .. image:: img/lab1_1.gif
 
-``question`` Point out the difference between  bare-metal programming and programming on top of operating system.
+``question 2`` Point out the difference between  bare-metal programming and programming on top of operating system.

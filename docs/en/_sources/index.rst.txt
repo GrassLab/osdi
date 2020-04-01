@@ -42,6 +42,7 @@ There are 3 types of labels appear in each lab.
   labs/lab0
   labs/lab1
   labs/lab2
+  labs/lab3
 
 Hardware
 ---------

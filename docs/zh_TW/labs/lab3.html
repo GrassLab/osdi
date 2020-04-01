@@ -1,0 +1,591 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 3 : Exception and Interrupt &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜尋" href="../search.html" />
+    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="prev" title="Lab 2 : Bootloader" href="lab2.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 3 : Exception and Interrupt</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#arm-exception">ARM Exception</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#exception-level">Exception level</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exception-vector-table">Exception vector table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#your-first-exception">Your first exception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arm-exception-mechanism">ARM exception mechanism</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#on-excpetion-taken">on excpetion taken</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exception-return">exception return</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#context-saving">Context saving</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pi3-s-interrupt">Pi3’s interrupt</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background">Background</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timer-interrupt">Timer interrupt</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#system-timer">system timer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arm-side-timer">arm side timer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arm-local-timer">arm local timer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arm-core-timer">arm core timer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#uart-interrupt">UART interrupt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deferred-interrupt-handle">Deferred interrupt handle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exception-level-switch">Exception Level Switch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#from-el2-to-el1">From EL2 to EL1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#el1-to-el0">EL1 to EL0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-system-call">Basic System Call</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/mailbox.html">Mailbox</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 3 : Exception and Interrupt</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab3.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-3-exception-and-interrupt">
+<h1>Lab 3 : Exception and Interrupt<a class="headerlink" href="#lab-3-exception-and-interrupt" title="本標題的永久連結">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="本標題的永久連結">¶</a></h2>
+<p>Exception and interrupt are important mechanisms in kernel.
+Interrupt free kernel from polling peripherals.
+Exception enables kernel to handle sporadic special events.</p>
+</div>
+<div class="section" id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="本標題的永久連結">¶</a></h2>
+<ul class="simple">
+<li><p>Understand how exception works.</p></li>
+<li><p>Understand how interrupt works.</p></li>
+<li><p>Implement the timer interrupt handler.</p></li>
+<li><p>Understand how to switch between exception levels.</p></li>
+</ul>
+</div>
+<div class="section" id="arm-exception">
+<h2>ARM Exception<a class="headerlink" href="#arm-exception" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="exception-level">
+<h3>Exception level<a class="headerlink" href="#exception-level" title="本標題的永久連結">¶</a></h3>
+<p>ARMv8-A CPU has 4 exception levels (EL) for different privilege operations.
+rpi3’s CPUs run in EL2 after booted by GPU by default.</p>
+<p>In different exception levels, the stack pointer is alias of SP_ELx.</p>
+<p>You can also use the same stack for all exception level by setting SPSel,
+then stack pointer is alias of SP_EL0 for all levels, but it’s not recommended.</p>
+<img alt="../_images/lab3_0.jpg" src="../_images/lab3_0.jpg" />
+</div>
+<div class="section" id="exception-vector-table">
+<h3>Exception vector table<a class="headerlink" href="#exception-vector-table" title="本標題的永久連結">¶</a></h3>
+<p>When CPU takes an exception, it needs to know how to handle it.
+It gets the address of the vector table from VBAR_ELx.
+Then it looks up the vector table to take the corresponding action.</p>
+<img alt="../_images/lab3_1.jpg" src="../_images/lab3_1.jpg" />
+<p><strong>Exception table example</strong></p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// load exception_table to VBAR_EL2</span>
+<span class="n">ldr</span> <span class="n">x0</span><span class="p">,</span> <span class="o">=</span><span class="n">exception_table</span>
+<span class="n">msr</span> <span class="n">VBAR_EL2</span><span class="p">,</span> <span class="n">x0</span>
+
+<span class="c1">// Simple vector table</span>
+<span class="p">.</span><span class="n">align</span> <span class="mi">11</span> <span class="c1">// vector table should be aligned to 0x800</span>
+<span class="p">.</span><span class="n">global</span> <span class="n">exception_table</span>
+<span class="nl">exception_table</span><span class="p">:</span>
+  <span class="n">b</span> <span class="n">exception_handler</span> <span class="c1">// branch to a handler function.</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span> <span class="c1">// entry size is 0x80, .align will pad 0</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+  <span class="n">b</span> <span class="n">exception_handler</span>
+  <span class="p">.</span><span class="n">align</span> <span class="mi">7</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="your-first-exception">
+<h3>Your first exception<a class="headerlink" href="#your-first-exception" title="本標題的永久連結">¶</a></h3>
+<p>After initializing the exception vector table for EL2, you can issue <code class="docutils literal notranslate"><span class="pre">svc</span> <span class="pre">#NUM</span></code> instruction (supervisor/system call) to take exception.
+In your <code class="docutils literal notranslate"><span class="pre">exception_handler</span></code> you can print the content of ELR_EL2 and ESR_EL2 and enter an infinite loop to check the return address and cause of the exception.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-0</span></code> Set up the exception vector table.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-1</span></code> Implement the exception handler for <strong>Synchronous Exceptions from the currentEL while using SP_ELx</strong> (offset 0x200-0x280 in the vector table).</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-2</span></code> Add an <code class="docutils literal notranslate"><span class="pre">exc</span></code> command to the shell. It issues <code class="docutils literal notranslate"><span class="pre">svc</span> <span class="pre">#1</span></code> and then your exception handler should print the return address, EC field, and ISS field.</p>
+<img alt="../_images/lab3_2.png" src="../_images/lab3_2.png" />
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> Change <code class="docutils literal notranslate"><span class="pre">svc</span></code> instruction to <code class="docutils literal notranslate"><span class="pre">brk</span></code> (breakpoint) instruction. See the difference in ELR_EL2(return address). Explain why there is a difference.</p>
+</div>
+<div class="section" id="arm-exception-mechanism">
+<h3>ARM exception mechanism<a class="headerlink" href="#arm-exception-mechanism" title="本標題的永久連結">¶</a></h3>
+<p>When CPU takes exception because of <code class="docutils literal notranslate"><span class="pre">svc</span></code> or other causes.
+There are a lot of things happen.</p>
+<p>Below are scripted and rephrased from ARMv8-A manual.</p>
+<div class="section" id="on-excpetion-taken">
+<h4>on excpetion taken<a class="headerlink" href="#on-excpetion-taken" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>The current processor state is saved in SPSR_ELx. (x is the number of target Exception Level)</p></li>
+<li><p>The exception return address is saved in ELR_ELx.</p></li>
+<li><p>Interrupt is disabled. (PSTATE.{D,A,I,F} are set to 1).</p></li>
+<li><p>If the exception is a synchronous exception or an SError interrupt, ESR_ELx saves the syndrome of that exception.</p></li>
+<li><p>Exception level becomes target Exception Level and the program counter is set to the corresponding exception vector address.</p></li>
+</ul>
+</div>
+<div class="section" id="exception-return">
+<h4>exception return<a class="headerlink" href="#exception-return" title="本標題的永久連結">¶</a></h4>
+<p>Issue <code class="docutils literal notranslate"><span class="pre">eret</span></code> instruction makes CPU return from the exception context.</p>
+<ul class="simple">
+<li><p>The program counter is restored from ELR_ELx.</p></li>
+<li><p>PSTATE is restored from SPSR_ELx.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="context-saving">
+<h3>Context saving<a class="headerlink" href="#context-saving" title="本標題的永久連結">¶</a></h3>
+<p>Registers』 content might change in the interrupt service routine (ISR).
+After returning from the exception, the context is corrupted if you dont’t save it correctly.
+In general, you should push general registers(x0-x30) to the stack before executing the entire ISR and pop them back before returning from the exception.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2</span></code>  Remove the infinite loop in exception_handler function and add <code class="docutils literal notranslate"><span class="pre">eret</span></code> at the end of ISRs.
+Observe the difference between saving and not saving general registers.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> Do you need to save floating point SIMD registers in ISRs? Why or why not.</p>
+</div>
+</div>
+<div class="section" id="pi3-s-interrupt">
+<h2>Pi3’s interrupt<a class="headerlink" href="#pi3-s-interrupt" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="background">
+<h3>Background<a class="headerlink" href="#background" title="本標題的永久連結">¶</a></h3>
+<p>ARMv8-A’s CPU treats interrupt as an asynchronous exception.
+Interrupts are categorized into IRQ and FIQ.
+Only IRQ is used for the labs.</p>
+<p>The interrupt controller routing has two levels.
+The first level routes core related interrupts such as core timer interrupts and core un-related interrupts such as interrupts from GPU.
+Then it sends the IRQ to ARM CPU.
+The details could be found in</p>
+<p><a class="reference external" href="https://github.com/raspberrypi/documentation/blob/master/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf">https://github.com/raspberrypi/documentation/blob/master/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf</a></p>
+<p>The second level routes interrupts from peripherals such as UART and system timer, they are aggregated and send to first level interrupt controller as GPU IRQ.
+The details could be found in</p>
+<p><a class="reference external" href="https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf">https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf</a> (page 109)</p>
+<p>To use interrupt in EL2, first you need to set HCR_EL2.IMO and clear PSTATE.DAIF to enable CPU to accept interrupt.
+Besides, peripherals』 IRQ is usually configure independently.
+You might need to check peripherals』 document to know how to configure them.
+After ISR, some peripherals need CPU to mandatory clear the interrupt signal.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">3</span></code>  What will happen if you don’t clear peripherals』 interrupt signal?</p>
+</div>
+<div class="section" id="timer-interrupt">
+<h3>Timer interrupt<a class="headerlink" href="#timer-interrupt" title="本標題的永久連結">¶</a></h3>
+<p>Timer is the easiest way to test interrupt mechanism.</p>
+<p>Rpi3 has 4 kinds of timers.
+We provide a list about how to configure them and some properties of them.</p>
+<div class="section" id="system-timer">
+<h4>system timer<a class="headerlink" href="#system-timer" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Not emulated by qemu.</p></li>
+<li><p>4 different comparing channels, no. 1, 3 are for ARM interrupt.</p></li>
+<li><p>In BCM2837 datasheet page 172.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define SYSTEM_TIMER_COMPARE1 0x3f003010</span>
+<span class="cp">#define SYSTEM_TIMER_CLO 0x3f003004</span>
+<span class="cp">#define SYSTEM_TIMER_CS 0x3f003000</span>
+<span class="cp">#define IRQ_ENABLE0 0x3f00b210</span>
+
+<span class="kt">void</span> <span class="nf">sys_timer_init</span><span class="p">(){</span>
+  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+  <span class="n">get</span><span class="p">(</span><span class="n">SYSTEM_TIMER_CLO</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">SYSTEM_TIMER_COMPARE1</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">2500000</span><span class="p">);</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">IRQ_ENABLE0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">sys_timer_handler</span><span class="p">(){</span>
+  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+  <span class="n">get</span><span class="p">(</span><span class="n">SYSTEM_TIMER_CLO</span><span class="p">,</span> <span class="n">t</span><span class="p">);</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">SYSTEM_TIMER_COMPARE1</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">2500000</span><span class="p">);</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">SYSTEM_TIMER_CS</span><span class="p">,</span> <span class="mh">0xf</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="arm-side-timer">
+<h4>arm side timer<a class="headerlink" href="#arm-side-timer" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Not emulated by qemu.</p></li>
+<li><p>In BCM2837 datasheet page 196.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define ARM_TIMER_CONTROL 0x3f00b408</span>
+<span class="cp">#define ARM_TIMER_LOAD 0x3f00b400</span>
+<span class="cp">#define ARM_TIMER_IRQ_CLR 0x3f00b218</span>
+<span class="cp">#define IRQ_ENABLE2 0x3f00b40c</span>
+
+<span class="kt">void</span> <span class="nf">arm_timer_init</span><span class="p">(){</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">ARM_TIMER_CONTROL</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">));</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">ARM_TIMER_LOAD</span><span class="p">,</span> <span class="mi">500000</span><span class="p">);</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">IRQ_ENABLE2</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">arm_timer_hanler</span><span class="p">(){</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">ARM_TIMER_IRQ_CLR</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="arm-local-timer">
+<h4>arm local timer<a class="headerlink" href="#arm-local-timer" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Emulated by qemu.</p></li>
+<li><p>Could be routed to different cores.</p></li>
+<li><p>Reload value is 27 bit long.</p></li>
+<li><p>QA7_rev3.4 data sheet page 17.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define LOCAL_TIMER_CONTROL_REG 0x40000034</span>
+
+<span class="kt">void</span> <span class="nf">local_timer_init</span><span class="p">(){</span>
+  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flag</span> <span class="o">=</span> <span class="mh">0x30000000</span> <span class="c1">// enable timer and interrupt.</span>
+  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">reload</span> <span class="o">=</span> <span class="mi">25000000</span><span class="p">;</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">LOCAL_TIMER_CONTROL</span><span class="p">,</span> <span class="n">flag</span> <span class="o">|</span> <span class="n">reload</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cp">#define LOCAL_TIMER_IRQ_CLR 0x40000038</span>
+
+<span class="kt">void</span> <span class="nf">local_timer_handler</span><span class="p">(){</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">LOCAL_TIMER_CONTROL</span><span class="p">,</span> <span class="mh">0xc0000000</span><span class="p">);</span> <span class="c1">// clear interrupt and reload.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="arm-core-timer">
+<h4>arm core timer<a class="headerlink" href="#arm-core-timer" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Emulated by qemu.</p></li>
+<li><p>4 CPU cores is configured independently.</p>
+<ul>
+<li><p>But the timer clock source is the same.</p></li>
+</ul>
+</li>
+<li><p>Control by arm registers.</p>
+<ul>
+<li><p>CNTPCT_EL0: Current timer count.</p></li>
+<li><p>CNTP_CVAL_EL0: If CNTPCT_EL0 &gt;= CNTP_CVAL_EL0 raise interrupt.</p></li>
+<li><p>CNTP_TVAL_EL0: Writing a time period, it automatically sets CNTP_CVAL_EL0 according to CNTPCT_EL0.</p></li>
+</ul>
+</li>
+<li><p>In QA7_rev3.4 data sheet page 9.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define CORE0_TIMER_IRQ_CTRL 0x40000040</span>
+
+<span class="nl">core_timer_enable</span><span class="p">:</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="mi">1</span>
+  <span class="n">msr</span> <span class="n">cntp_ctl_el0</span><span class="p">,</span> <span class="n">x0</span> <span class="c1">// enable timer</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="mi">2</span>
+  <span class="n">ldr</span> <span class="n">x1</span><span class="p">,</span> <span class="o">=</span><span class="n">CORE0_TIMER_IRQ_CTRL</span>
+  <span class="n">str</span> <span class="n">x0</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">]</span> <span class="c1">// enable timer interrupt</span>
+
+<span class="cp">#define EXPIRE_PERIOD 0xfffffff</span>
+
+<span class="nl">core_timer_handler</span><span class="p">:</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="n">EXPIRE_PERIOD</span>
+  <span class="n">msr</span> <span class="n">cntp_tval_el0</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-1</span></code> Implement IRQ handler for <strong>IRQ Exception from the current EL while using SP_ELx</strong>. (offset 0x280-0x300 in the vector table)</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-2</span></code> Implement the arm core timer handler. Add <code class="docutils literal notranslate"><span class="pre">irq</span></code> command to the shell to enable timer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Pick another timer and implement its handler.</p>
+<img alt="../_images/lab3_3.gif" src="../_images/lab3_3.gif" />
+</div>
+</div>
+<div class="section" id="uart-interrupt">
+<h3>UART interrupt<a class="headerlink" href="#uart-interrupt" title="本標題的永久連結">¶</a></h3>
+<p>UART can be handled by either polling until UART is available or using interrupt.
+Because we don’t know when UART is available, it’ll waste a lot of CPU time on it.
+Let UART interrupts CPU when it’s available, then transmit or receive data in ISR is more efficient.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2</span></code> Implement ISR for either mini UART or PL011 UART.</p>
+</div>
+<div class="section" id="deferred-interrupt-handle">
+<h3>Deferred interrupt handle<a class="headerlink" href="#deferred-interrupt-handle" title="本標題的永久連結">¶</a></h3>
+<p>When CPU takes exceptions, interrupt is disabled immediately.
+Then a critical interrupt might be blocked by a non-critical interrupt.
+Hence, we need to enable interrupt in the halfway of ISR.
+For the top half of ISR, it should clear the interrupt, move data (possibly using DMA) and schedule the bottom half ISR.
+For the bottom half of ISR, it only disable interrupt in critical section and finishing the remaining jobs.</p>
+<p>By enabling interrupt in bottom half of ISR, you’ll get a better response time and give higher priority to critical interrupt.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3</span></code> Use a long delay to simulate bottom half of ISR. Compare the difference between enabling and not enabling interrupt after top half of ISR.</p>
+</div>
+</div>
+<div class="section" id="exception-level-switch">
+<h2>Exception Level Switch<a class="headerlink" href="#exception-level-switch" title="本標題的永久連結">¶</a></h2>
+<p>As you saw on the picture describing exception levels.
+EL0 is designed for application and EL1 is for kernel.
+You have already practiced how exception and interrupt work in EL2.
+In the next lab, your kernel will run in EL1 interacts with tasks runs in EL0.
+Hence, you should know how to switch between exception levels.</p>
+<div class="section" id="from-el2-to-el1">
+<h3>From EL2 to EL1<a class="headerlink" href="#from-el2-to-el1" title="本標題的永久連結">¶</a></h3>
+<p>In the previous exercise, your program ran in EL2.
+Now, you’re moving onto EL1.
+Remember that the PSTATE and return address would be kept in SPSR_EL2 and ELR_EL2 when exception is taken
+and restore when you execute <code class="docutils literal notranslate"><span class="pre">eret</span></code>?
+You can manually write SPSR_EL2 and ELR_EL2 to simulate that you already take exception from EL1 to EL2.
+After executing <code class="docutils literal notranslate"><span class="pre">eret</span></code>, you’ll switch back to EL1 and your program counter is restored from ELR_EL2.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<ul class="simple">
+<li><p>You could set stack pointer by setting <code class="docutils literal notranslate"><span class="pre">msr</span> <span class="pre">SP_EL1,</span> <span class="pre">x0</span></code> before <code class="docutils literal notranslate"><span class="pre">eret</span></code> or by <code class="docutils literal notranslate"><span class="pre">mov</span> <span class="pre">sp,</span> <span class="pre">x0</span></code> after <code class="docutils literal notranslate"><span class="pre">eret</span></code></p></li>
+<li><p>You should also write HCR_EL2.RW to 1 because you’re running 64 bit kernel.</p></li>
+<li><p>Do not set HCR_EL2.IMO if you want your interrupt directly goto kernel in EL1 not the hypervisor run in EL2.</p></li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>Take care about VBAR_EL1, VBAR_EL2 and exception table if you don’t change from EL2 to EL1 in the early initialization stage.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>The EL1 exception handler should be different from EL2 exception handler such as you should read ELR_EL1 for return address instead of ELR_EL2.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-1</span></code> Return from EL2 to EL1 and set the corresponding handlers.</p>
+</div>
+<div class="section" id="el1-to-el0">
+<h3>EL1 to EL0<a class="headerlink" href="#el1-to-el0" title="本標題的永久連結">¶</a></h3>
+<p>You’ve known how to return from EL2 to EL1.
+From EL1 to EL0, it’s almost the same.
+However, you need to notice that, exceptions include interrupts in EL0 are handled by EL1’s exception handler.
+Hence, you need to set up VBAR_EL1.
+Also, the exceptions are handled by higher EL so you need to set up the exception handler in vector table with offset 0x400-0x600.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You should also carefully set stack pointer for EL0.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-2</span></code> Return from EL1 to EL0 and run shell in EL0.</p>
+</div>
+<div class="section" id="basic-system-call">
+<h3>Basic System Call<a class="headerlink" href="#basic-system-call" title="本標題的永久連結">¶</a></h3>
+<p>You might notice that when you execute <code class="docutils literal notranslate"><span class="pre">irq</span></code> command in the shell, CPU takes an exception.
+That because you use <code class="docutils literal notranslate"><span class="pre">msr</span></code> to write core timer register which is a privilege operation.
+To enable the timer, now you have to rely on the kernel in EL1.
+You can use <code class="docutils literal notranslate"><span class="pre">svc</span></code> to perform a system call.
+In EL1’s synchronous exception handler, you check ESR_EL1 to identify the exception is a system call then enable the timer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-3</span></code> Reimplement <code class="docutils literal notranslate"><span class="pre">irq</span></code> command by system call.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lab2.html" class="btn btn-neutral float-left" title="Lab 2 : Bootloader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

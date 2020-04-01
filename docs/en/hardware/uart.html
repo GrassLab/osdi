@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab0.html">Lab 0: Environment Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab1.html">Lab 1 : Hello World</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../labs/lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../labs/lab3.html">Lab 3 : Exception and Interrupt</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul class="current">
@@ -225,6 +226,12 @@ Then mini UART register can be accessed.</p></li>
 <li><p>Check AUX_MU_LSR_REG’s Transmitter empty field.</p></li>
 <li><p>If set, write to AUX_MU_IO_REG</p></li>
 </ol>
+<p><strong>Interrupt</strong></p>
+<ul class="simple">
+<li><p>AUX_MU_IER_REG: enable tx/rx interrupt</p></li>
+<li><p>AUX_MU_IIR_REG: check interrupt cause</p></li>
+<li><p>Interrupt enable register1(page 116 of manual): set 29 bit to enable. (AUX interrupt enable)</p></li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>By default, QEMU uses UART0 (PL011 UART) as serial io.
@@ -236,7 +243,7 @@ If you want to use UART1 (mini UART) use flag <code class="docutils literal notr
 <p>To use PL011 UART, you should set up the clock for it first.
 It’s configured by <a class="reference internal" href="mailbox.html#mailbox"><span class="std std-ref">Mailbox</span></a>.</p>
 <p>Besides the clock configuration, it’s similar to mini UART.</p>
-<p><strong>Setup</strong></p>
+<p><strong>Setup(Lab1)</strong></p>
 <ol class="arabic simple">
 <li><p>Configure the UART clock frequency by mailbox.</p></li>
 <li><p>Enable GPIO (almost same as mini UART).</p></li>
@@ -254,6 +261,19 @@ It’s configured by <a class="reference internal" href="mailbox.html#mailbox"><
 <li><p>Check FR</p></li>
 <li><p>Write to DR</p></li>
 </ol>
+<p><strong>Interrupt</strong></p>
+<ul class="simple">
+<li><p>IMSC: enable tx/rx interrupt</p></li>
+<li><p>MIS: check interrupt cause</p></li>
+<li><p>ICR: clear interrupt (read or write DR will automatically clear)</p></li>
+<li><p>Interrupt enable register2(page 117 of manual): set 25 bit to enable. (UART interrupt enable)</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>qemu has a bug on PL011 UART’s transmit interrupt.
+According to manual, interrupt is set if transmit buffer is empty.
+But in qemu, you need to send your first byte then the MIS register would function well.</p>
+</div>
 </div>
 </div>
 
