@@ -382,10 +382,10 @@ We provide a list about how to configure them and some properties of them.</p>
 <li><p>Not emulated by qemu.</p></li>
 <li><p>In BCM2837 datasheet page 196.</p></li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define ARM_TIMER_CONTROL 0x3f00b408</span>
-<span class="cp">#define ARM_TIMER_LOAD 0x3f00b400</span>
-<span class="cp">#define ARM_TIMER_IRQ_CLR 0x3f00b218</span>
-<span class="cp">#define IRQ_ENABLE2 0x3f00b40c</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define ARM_TIMER_LOAD 0x3f00b400</span>
+<span class="cp">#define ARM_TIMER_CONTROL 0x3f00b408</span>
+<span class="cp">#define ARM_TIMER_IRQ_CLR 0x3f00b40c</span>
+<span class="cp">#define IRQ_ENABLE2 0x3f00b218</span>
 
 <span class="kt">void</span> <span class="nf">arm_timer_init</span><span class="p">(){</span>
   <span class="n">set</span><span class="p">(</span><span class="n">ARM_TIMER_CONTROL</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">));</span>

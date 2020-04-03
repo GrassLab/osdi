@@ -238,10 +238,10 @@ arm side timer
 
 .. code:: c
 
-  #define ARM_TIMER_CONTROL 0x3f00b408
   #define ARM_TIMER_LOAD 0x3f00b400
-  #define ARM_TIMER_IRQ_CLR 0x3f00b218
-  #define IRQ_ENABLE2 0x3f00b40c
+  #define ARM_TIMER_CONTROL 0x3f00b408
+  #define ARM_TIMER_IRQ_CLR 0x3f00b40c
+  #define IRQ_ENABLE2 0x3f00b218
 
   void arm_timer_init(){
     set(ARM_TIMER_CONTROL, (1 << 7) | (1 << 5) | (1 << 1));
