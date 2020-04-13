@@ -441,15 +441,16 @@ We provide a list about how to configure them and some properties of them.</p>
 <li><p>In QA7_rev3.4 data sheet page 9.</p></li>
 </ul>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define CORE0_TIMER_IRQ_CTRL 0x40000040</span>
+<span class="cp">#define EXPIRE_PERIOD 0xfffffff</span>
 
 <span class="nl">core_timer_enable</span><span class="p">:</span>
   <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="mi">1</span>
   <span class="n">msr</span> <span class="n">cntp_ctl_el0</span><span class="p">,</span> <span class="n">x0</span> <span class="c1">// enable timer</span>
+  <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="n">EXPIRE_PERIOD</span>
+  <span class="n">msr</span> <span class="n">cntp_tval_el0</span> <span class="c1">// set expired time</span>
   <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="mi">2</span>
   <span class="n">ldr</span> <span class="n">x1</span><span class="p">,</span> <span class="o">=</span><span class="n">CORE0_TIMER_IRQ_CTRL</span>
   <span class="n">str</span> <span class="n">x0</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">]</span> <span class="c1">// enable timer interrupt</span>
-
-<span class="cp">#define EXPIRE_PERIOD 0xfffffff</span>
 
 <span class="nl">core_timer_handler</span><span class="p">:</span>
   <span class="n">mov</span> <span class="n">x0</span><span class="p">,</span> <span class="n">EXPIRE_PERIOD</span>
