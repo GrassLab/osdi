@@ -278,7 +278,7 @@ arm local timer
   #define LOCAL_TIMER_IRQ_CLR 0x40000038
 
   void local_timer_handler(){
-    set(LOCAL_TIMER_CONTROL, 0xc0000000); // clear interrupt and reload.
+    set(LOCAL_TIMER_IRQ_CLR, 0xc0000000); // clear interrupt and reload.
   }
 
 arm core timer

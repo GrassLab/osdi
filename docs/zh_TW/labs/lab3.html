@@ -418,7 +418,7 @@ We provide a list about how to configure them and some properties of them.</p>
 <span class="cp">#define LOCAL_TIMER_IRQ_CLR 0x40000038</span>
 
 <span class="kt">void</span> <span class="nf">local_timer_handler</span><span class="p">(){</span>
-  <span class="n">set</span><span class="p">(</span><span class="n">LOCAL_TIMER_CONTROL</span><span class="p">,</span> <span class="mh">0xc0000000</span><span class="p">);</span> <span class="c1">// clear interrupt and reload.</span>
+  <span class="n">set</span><span class="p">(</span><span class="n">LOCAL_TIMER_IRQ_CLR</span><span class="p">,</span> <span class="mh">0xc0000000</span><span class="p">);</span> <span class="c1">// clear interrupt and reload.</span>
 <span class="p">}</span>
 </pre></div>
 </div>
