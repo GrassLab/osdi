@@ -1,0 +1,961 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 4 : Multitasking &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜尋" href="../search.html" />
+    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="prev" title="Lab 3 : Exception and Interrupt" href="lab3.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3 : Exception and Interrupt</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 4 : Multitasking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#memory-layout">Memory layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privilege-tasks-user-tasks">Privilege tasks &amp; User tasks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#privilege-task">Privilege Task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#user-task">User Task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#in-common">In Common</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-state">Runtime state</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#required">Required</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#continue-from-lab3">Continue from lab3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-1">Requirement 1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#design-your-own-task-struct">Design your own task struct</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-privilege-tasks">Create privilege tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#context-switch">Context Switch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler">Scheduler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#idle-task">Idle task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pitfall">Pitfall</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#runtime-state-transition-example">Runtime state transition example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-2">Requirement 2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#timer-interrupt">Timer Interrupt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Runtime state transition example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-3">Requirement 3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">User task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#user-tasks-preemption">User tasks preemption</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Runtime state transition example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-4">Requirement 4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#system-call">System call</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#i-o-system-calls">I/O system calls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exec">Exec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fork">Fork</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exit">Exit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#required-system-calls-summary">Required system calls summary</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#test-cases">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#elective">Elective</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#signal">Signal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#priority-based-scheduler">Priority based scheduler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wait-for-event">Wait for event</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lock">Lock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mutex">mutex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#atomic-operation">atomic operation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#preemtive-kernel">Preemtive kernel</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/mailbox.html">Mailbox</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 4 : Multitasking</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab4.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-4-multitasking">
+<h1>Lab 4 : Multitasking<a class="headerlink" href="#lab-4-multitasking" title="本標題的永久連結">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="本標題的永久連結">¶</a></h2>
+<p>Multitasking is the most important feature of operating systems.
+You’ll learn how to implement the basis of multitasking and understand how user mode and kernel mode interact in depth.</p>
+<p>The multitasking mechanism in this lab works without virtual memory which is common for MMU-less devices.
+You can build up a basic concept of multitasking, and you’ll reimplement it after we introduce how virtual memory works in the next lab.</p>
+</div>
+<div class="section" id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="本標題的永久連結">¶</a></h2>
+<ul class="simple">
+<li><p>Understand how to create tasks.</p></li>
+<li><p>Understand how tasks get scheduled and context switch.</p></li>
+<li><p>Understand how to design system calls.</p></li>
+<li><p>Understand how to design signal mechanism.</p></li>
+<li><p>Understand how to design lock and wait mechanism.</p></li>
+<li><p>Understand how to design preemptive kernel</p></li>
+</ul>
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="本標題的永久連結">¶</a></h2>
+<p>This section provides the basis for this lab.</p>
+<p><strong>You don’t have to read it through in the beginning.</strong>
+Instead, you can just skim it and go back to this section for details when you get into troubles.</p>
+<div class="section" id="memory-layout">
+<h3>Memory layout<a class="headerlink" href="#memory-layout" title="本標題的永久連結">¶</a></h3>
+<p>You don’t have to care a lot about memory layout in the single-task case.
+In multitasking, the kernel is responsible for switching the context between tasks.
+Hence, you should pay more attention to how registers and stack pointer should be modified.</p>
+<p>Here, we provide a simple memory layout for you in this lab.
+<strong>It’s just a reference</strong>, you can still devise it yourself.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="o">+------------------+</span>
+<span class="o">|</span> <span class="n">Arm</span> <span class="n">Peripherals</span>  <span class="o">|</span>
+<span class="o">+------------------+</span> <span class="o">&lt;-</span> <span class="mh">0x40000000</span>
+<span class="o">|</span> <span class="n">GPU</span> <span class="n">Peripherals</span>  <span class="o">|</span>
+<span class="o">+------------------+</span> <span class="o">&lt;-</span> <span class="mh">0x3f000000</span>
+<span class="o">|</span>        <span class="p">.</span>         <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>   <span class="n">User</span> <span class="n">stack</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>  <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>        <span class="p">.</span>         <span class="o">|</span>
+<span class="o">|</span>        <span class="p">.</span>         <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>   <span class="n">User</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>  <span class="n">Kernel</span> <span class="n">stack</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>        <span class="p">.</span>         <span class="o">|</span>
+<span class="o">|</span>        <span class="p">.</span>         <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>  <span class="n">Kernel</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>  <span class="n">Interrupt</span> <span class="n">stack</span> <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span>  <span class="n">kernel</span><span class="o">/</span><span class="n">user</span> <span class="n">bss</span> <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span> <span class="n">kernel</span><span class="o">/</span><span class="n">user</span> <span class="n">data</span> <span class="o">|</span>
+<span class="o">+------------------+</span>
+<span class="o">|</span> <span class="n">kernel</span><span class="o">/</span><span class="n">user</span> <span class="n">text</span> <span class="o">|</span>
+<span class="o">+------------------+</span> <span class="o">&lt;-</span> <span class="n">kernel_base</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="privilege-tasks-user-tasks">
+<h3>Privilege tasks &amp; User tasks<a class="headerlink" href="#privilege-tasks-user-tasks" title="本標題的永久連結">¶</a></h3>
+<p>Your kernel <strong>should support privilege tasks and user tasks</strong>.
+They are mostly in common with some key differences.
+Specification lists below.</p>
+<div class="section" id="privilege-task">
+<h4>Privilege Task<a class="headerlink" href="#privilege-task" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Always run in the the kernel mode.</p></li>
+<li><p>Doing miscellaneous jobs that should be done in the kernel mode with independent task context.</p></li>
+</ul>
+</div>
+<div class="section" id="user-task">
+<h4>User Task<a class="headerlink" href="#user-task" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Mostly run user code in the user mode.</p></li>
+<li><p>Run in the kernel mode if exceptions taken.</p></li>
+<li><p>Has its own user mode’s context and the user mode’s context should be saved and restored when enter and exit the kernel mode.</p></li>
+</ul>
+</div>
+<div class="section" id="in-common">
+<h4>In Common<a class="headerlink" href="#in-common" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>Have its own kernel stack.</p></li>
+<li><p>Context switch in kernel mode.</p></li>
+<li><p>Queue in the same runqueue.</p></li>
+</ul>
+<p><strong>In short, privilege task and user task are almost the same except that user task has user context and is able to return to user mode.</strong></p>
+</div>
+</div>
+<div class="section" id="runtime-state">
+<span id="id1"></span><h3>Runtime state<a class="headerlink" href="#runtime-state" title="本標題的永久連結">¶</a></h3>
+<p>To help you quickly understand how to design a multitasking kernel, We summarize the runtime into 5 different states.
+You should follow the description to implement your kernel.</p>
+<p><strong>(1) Task is running in user mode</strong></p>
+<p>Normally, a user task runs user code in the user mode.</p>
+<p><strong>(2) Task is at the entry/exit of a kernel routine</strong></p>
+<ul class="simple">
+<li><p>A user task entered kernel mode and already saved its registers for the remaining kernel routine, or</p></li>
+<li><p>A user task finished the kernel routine, and about to restore its registers and return to user mode.</p></li>
+</ul>
+<p><strong>(3) Task is running a kernel routine</strong></p>
+<p>A privilege/user task is running a kernel code with <strong>its own kernel stack</strong>.</p>
+<p><strong>(4) Task is running in the interrupt context</strong></p>
+<p>Either when user or privilege tasks are running, interrupt might happen.
+It’s a special case because the interrupt context does not belong to any tasks.</p>
+<p><strong>(5) Context switch state</strong></p>
+<p>A task switching happens here, kernel enter this state because voluntarily yield or get preempted at the end of ISR.</p>
+<ul class="simple">
+<li><p>The following transition diagram visualize the specification.
+It also colors the transition should be finished in which step.</p></li>
+</ul>
+<img alt="../_images/lab4_2.png" src="../_images/lab4_2.png" />
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You don’t have to use another interrupt stack for ISR, but you should know interrupt context is different from task context.
+<strong>You should not reschedule inside ISR.</strong></p>
+</div>
+</div>
+</div>
+<div class="section" id="required">
+<h2>Required<a class="headerlink" href="#required" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="continue-from-lab3">
+<h3>Continue from lab3<a class="headerlink" href="#continue-from-lab3" title="本標題的永久連結">¶</a></h3>
+<p>In the last lab, you already implement the interrupt and system call mechanism and run your shell in EL0.
+Now, let’s move back a little bit.
+In the beginning of lab4, your <strong>interrupt stay disabled</strong> and you <strong>stay at EL1 without running shell</strong> in the booting stage.
+Of course, you should still set up UART to print debug message.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>For the <code class="docutils literal notranslate"><span class="pre">required</span></code> part, you can disable interrupt when you are in EL1, it simplifies the design and makes debugging easier.</p>
+</div>
+</div>
+<div class="section" id="requirement-1">
+<h3>Requirement 1<a class="headerlink" href="#requirement-1" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="design-your-own-task-struct">
+<h4>Design your own task struct<a class="headerlink" href="#design-your-own-task-struct" title="本標題的永久連結">¶</a></h4>
+<p>Task struct (or process control block) is a data structure fore keeping a task’s information.
+It could include a lot of things such as task id, task status, cpu state, context of task…
+You should design your own task struct to help kernel context switch between each tasks.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-1</span></code> Design your own task struct with at least one field called task id. Task ids should be unique.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You don’t have to make your task struct perfect or complete at the first time.
+You can define a minimum one, and refine it everytime you find that you need to keep certain information in it.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>For simplicity, you can statically allocate a task struct pool such as <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">task</span> <span class="pre">task_pool[64];</span></code>, and set the task id as the index of pool.</p>
+</div>
+</div>
+<div class="section" id="create-privilege-tasks">
+<h4>Create privilege tasks<a class="headerlink" href="#create-privilege-tasks" title="本標題的永久連結">¶</a></h4>
+<p>Now, you can create tasks.
+Let’s start from creating privilege tasks.
+You need to implement the function <code class="docutils literal notranslate"><span class="pre">privilege_task_create(void(*func)())</span></code>
+It’ll allocate one task struct and one kernel stack.
+The created privilege task <strong>start at the provided function pointer</strong> <code class="docutils literal notranslate"><span class="pre">func</span></code> and <strong>use the allocated kernel stack</strong> for its private usage.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-2</span></code> Implement <code class="docutils literal notranslate"><span class="pre">privilege_task_create</span></code>.</p>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>You may statically allocate a kernel stack pool such as <code class="docutils literal notranslate"><span class="pre">char</span> <span class="pre">kstack_pool[64][4096]</span></code>, and allocate it according to the task id.</p>
+</div>
+</div>
+<div class="section" id="context-switch">
+<h4>Context Switch<a class="headerlink" href="#context-switch" title="本標題的永久連結">¶</a></h4>
+<p>It’s time to test if the above functions work well.</p>
+<p>You should implement <code class="docutils literal notranslate"><span class="pre">context_switch(struct</span> <span class="pre">task*</span> <span class="pre">next)</span></code> to switch between each task.
+You need to <strong>save the current task’s context and restore the next task’s context</strong>.</p>
+<p>You can create two privilege tasks after kernel initialization.
+Each one will print some message, delay a period of time, and call <code class="docutils literal notranslate"><span class="pre">context_switch</span></code> to switch the other one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-3</span></code> Implement <code class="docutils literal notranslate"><span class="pre">context_switch</span></code>.</p>
+<img alt="../_images/lab4_0.gif" src="../_images/lab4_0.gif" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">This</span> <span class="ow">is</span> <span class="n">example</span> <span class="k">for</span> <span class="n">a</span> <span class="n">simple</span> <span class="n">context</span> <span class="n">switch</span><span class="p">,</span> <span class="n">you</span> <span class="n">should</span> <span class="n">change</span> <span class="n">it</span> <span class="n">according</span> <span class="n">to</span> <span class="n">your</span> <span class="n">task</span> <span class="n">struct</span> <span class="n">design</span><span class="o">.</span>
+
+<span class="o">.</span><span class="k">global</span> <span class="n">switch_to</span>
+<span class="n">switch_to</span><span class="p">:</span>
+  <span class="n">stp</span> <span class="n">x19</span><span class="p">,</span> <span class="n">x20</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">0</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x21</span><span class="p">,</span> <span class="n">x22</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x23</span><span class="p">,</span> <span class="n">x24</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x25</span><span class="p">,</span> <span class="n">x26</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">x27</span><span class="p">,</span> <span class="n">x28</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">4</span><span class="p">]</span>
+  <span class="n">stp</span> <span class="n">fp</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">5</span><span class="p">]</span>
+  <span class="n">mov</span> <span class="n">x9</span><span class="p">,</span> <span class="n">sp</span>
+  <span class="nb">str</span> <span class="n">x9</span><span class="p">,</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">6</span><span class="p">]</span>
+
+  <span class="n">ldp</span> <span class="n">x19</span><span class="p">,</span> <span class="n">x20</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">0</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x21</span><span class="p">,</span> <span class="n">x22</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x23</span><span class="p">,</span> <span class="n">x24</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x25</span><span class="p">,</span> <span class="n">x26</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">x27</span><span class="p">,</span> <span class="n">x28</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">4</span><span class="p">]</span>
+  <span class="n">ldp</span> <span class="n">fp</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">5</span><span class="p">]</span>
+  <span class="n">ldr</span> <span class="n">x9</span><span class="p">,</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">6</span><span class="p">]</span>
+  <span class="n">mov</span> <span class="n">sp</span><span class="p">,</span>  <span class="n">x9</span>
+  <span class="n">msr</span> <span class="n">tpidr_el1</span><span class="p">,</span> <span class="n">x1</span>
+  <span class="n">ret</span>
+
+<span class="o">.</span><span class="k">global</span> <span class="n">get_current</span>
+<span class="n">get_current</span><span class="p">:</span>
+  <span class="n">mrs</span> <span class="n">x0</span><span class="p">,</span> <span class="n">tpidr_el1</span>
+
+<span class="c1">#define current get_current();</span>
+
+<span class="n">extern</span> <span class="n">struct</span> <span class="n">task</span><span class="o">*</span> <span class="n">get_current</span><span class="p">();</span>
+
+<span class="n">void</span> <span class="n">context_switch</span><span class="p">(</span><span class="n">struct</span> <span class="n">task</span><span class="o">*</span> <span class="nb">next</span><span class="p">){</span>
+  <span class="n">struct</span> <span class="n">task</span><span class="o">*</span> <span class="n">prev</span> <span class="o">=</span> <span class="n">current</span><span class="p">;</span>
+  <span class="n">switch_to</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="nb">next</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scheduler">
+<h4>Scheduler<a class="headerlink" href="#scheduler" title="本標題的永久連結">¶</a></h4>
+<p>It’s hard for tasks to know which task it suppose to switch to
+, so you need a scheduler.
+The scheduler finds the next task to be run and context switch to it.</p>
+<div class="section" id="put-task-into-runqueue">
+<h5>Put task into runqueue<a class="headerlink" href="#put-task-into-runqueue" title="本標題的永久連結">¶</a></h5>
+<p>There are runnable tasks and non-runnable tasks.
+You can create a data structure called runqueue for CPU.
+Runnable tasks will be put into runqueue and scheduler can pick one from runqueue and switch to it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-4</span></code> In the end of <code class="docutils literal notranslate"><span class="pre">privilege_task_create</span></code>, put the task into the runqueue.</p>
+</div>
+<div class="section" id="schedule-a-task">
+<h5>Schedule a task<a class="headerlink" href="#schedule-a-task" title="本標題的永久連結">¶</a></h5>
+<p>After runnable tasks are in the runqueue, you can use an arbitrary scheduling algorithm to pick a task from runqueue.
+You need to implement a <strong>round-robin scheduling algorithm</strong> in this lab.</p>
+<p>After you have your own scheduler and runqueue, you should provide a function call <code class="docutils literal notranslate"><span class="pre">schedule()</span></code>.
+It picks the next task according to it scheduling policy and use <code class="docutils literal notranslate"><span class="pre">context_switch</span></code> to switch to it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-5</span></code> Replace <code class="docutils literal notranslate"><span class="pre">context_switch</span></code> with <code class="docutils literal notranslate"><span class="pre">schedule</span></code> in the privilege tasks, you should be able to create more than 2 tasks and switch between them.</p>
+</div>
+</div>
+<div class="section" id="idle-task">
+<h4>Idle task<a class="headerlink" href="#idle-task" title="本標題的永久連結">¶</a></h4>
+<p>Idle task is always runnable.
+When there is no other runnable task, it get scheduled and run to prevent a non-deterministic state of CPU.</p>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>You may statically define a startup privilege task, and the task do the following jobs</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Setup the kernel after booted by GPU.</p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">privilege_task_create</span></code> to create the second task.</p></li>
+<li><p>Enter idle state, and now the startup task becomes the idle task.</p></li>
+<li><p>In idle state, repeatly call <code class="docutils literal notranslate"><span class="pre">schedule</span></code> in an infinite loop, the idle task get switched out if there is another runnable task.</p></li>
+</ol>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="pitfall">
+<h4>Pitfall<a class="headerlink" href="#pitfall" title="本標題的永久連結">¶</a></h4>
+<ul class="simple">
+<li><p>If you don’t implement preemptive kernel, privilege tasks should always explicitly call <code class="docutils literal notranslate"><span class="pre">schedule</span></code> at some time to switch another task.
+Otherwise, CPU will never run other tasks.</p></li>
+<li><p>Do not return from privilege task’s routine, you should call <code class="docutils literal notranslate"><span class="pre">exit</span></code> to end a privilege task. (introduce later)</p></li>
+</ul>
+</div>
+<div class="section" id="runtime-state-transition-example">
+<h4>Runtime state transition example<a class="headerlink" href="#runtime-state-transition-example" title="本標題的永久連結">¶</a></h4>
+<img alt="../_images/lab4_3.png" src="../_images/lab4_3.png" />
+</div>
+</div>
+<div class="section" id="requirement-2">
+<h3>Requirement 2<a class="headerlink" href="#requirement-2" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="timer-interrupt">
+<h4>Timer Interrupt<a class="headerlink" href="#timer-interrupt" title="本標題的永久連結">¶</a></h4>
+<p>Timer interrupts CPU periodically, we can use it for time sharing system.
+Timer interrupt handler will update current task’s running time and check if it used up it time in this epoch.
+If yes, it sets the reschedule flag of the current task to indicate that task need to call <code class="docutils literal notranslate"><span class="pre">schedule</span></code> to yield CPU later on.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-1</span></code> Reimplement the core timer handler, it updates the current task’s reschedule flag.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-2</span></code> Create more than 2 privilege tasks. Each of them keeps checking the reschedule flag. If the flag is set, it prints some message, clears reschedule flag and issue <code class="docutils literal notranslate"><span class="pre">schedule</span></code> .</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<ul class="simple">
+<li><p>You need to enable interrupt in EL1 here to test this requirement’s functionality</p></li>
+<li><p>After you implement user task( in the later section ), you can disable interrupt in EL1 for simplicity and you can still get the full score for <code class="docutils literal notranslate"><span class="pre">required</span></code>.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id2">
+<h4>Runtime state transition example<a class="headerlink" href="#id2" title="本標題的永久連結">¶</a></h4>
+<img alt="../_images/lab4_4.png" src="../_images/lab4_4.png" />
+</div>
+</div>
+<div class="section" id="requirement-3">
+<h3>Requirement 3<a class="headerlink" href="#requirement-3" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="id3">
+<h4>User task<a class="headerlink" href="#id3" title="本標題的永久連結">¶</a></h4>
+<p>Besides privilege tasks, you’ll also need user tasks with less privilege for safety and security.</p>
+<div class="section" id="user-mode-context">
+<h5>User mode context<a class="headerlink" href="#user-mode-context" title="本標題的永久連結">¶</a></h5>
+<p>You’re going to implement multitasking in user mode now.
+You already know that user mode’s general registers are saved at the top of kernel stack.
+Besides, you should also notice 3 user task related system registers.</p>
+<ol class="arabic simple">
+<li><p>SP_EL0: The address of user mode’s stack pointer.</p></li>
+<li><p>ELR_EL1: The program counter of user mode’s procedure.</p></li>
+<li><p>SPSR_EL1: The CPU state of user mode.</p></li>
+</ol>
+<p>SP_EL0, ELR_EL1, SPSR_EL1 should be properly saved and restored when task’s execution mode switch between user mode and kernel mode.</p>
+<p>Also, an user task should have <strong>one kernel stack and one user stack</strong>.
+They are used for executing in different modes.</p>
+</div>
+<div class="section" id="do-exec">
+<h5>do_exec<a class="headerlink" href="#do-exec" title="本標題的永久連結">¶</a></h5>
+<p><code class="docutils literal notranslate"><span class="pre">exec</span></code> originally takes a program file as argument and execute it.
+Currently, filesystem is not implemented, but we still borrow the name with a little bit changed.</p>
+<p>Now, you should implement <code class="docutils literal notranslate"><span class="pre">do_exec(void(*func)())</span></code> which takes a function pointer to user code.
+And it should set up the task’s user context.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-1</span></code> Implement <code class="docutils literal notranslate"><span class="pre">do_exec</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<ul class="simple">
+<li><p>After privilege task becomes user task, it should be able to go to runtime state (2) mentioned in <a class="reference internal" href="#runtime-state"><span class="std std-ref">Runtime state</span></a></p></li>
+<li><p>Kernel mode also use ELR_EL1 and SPSR_EL1 during exception and interrupt handling, don’t mess it up if you enable interrupt in EL1.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="user-tasks-preemption">
+<h4>User tasks preemption<a class="headerlink" href="#user-tasks-preemption" title="本標題的永久連結">¶</a></h4>
+<p>Multitasking in user mode can still be implemented by voluntarily yield the control to other task.
+A system calls such as <a class="reference external" href="http://man7.org/linux/man-pages/man2/sched_yield.2.html">sched_yield</a> helps user task to do this.
+However, it’s inconvienent for user to insert it in their code everywhere.
+Also, too much or too few yield calls may happens for amateur user code programmer.</p>
+<p>Hence, a preemption mechanism provided by kernel is needed for user task.
+User tasks preemption could be easily implemented as:</p>
+<p>When a user task finishes its kernel routine or an ISR and ready to return user mode, it checks the reschedule flag and call <code class="docutils literal notranslate"><span class="pre">schedule()</span></code> to switch to another task if the flag is set.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-2</span></code> Implement user tasks preemption.</p>
+</div>
+<div class="section" id="id4">
+<h4>Runtime state transition example<a class="headerlink" href="#id4" title="本標題的永久連結">¶</a></h4>
+<img alt="../_images/lab4_5.png" src="../_images/lab4_5.png" />
+</div>
+</div>
+<div class="section" id="requirement-4">
+<h3>Requirement 4<a class="headerlink" href="#requirement-4" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="system-call">
+<h4>System call<a class="headerlink" href="#system-call" title="本標題的永久連結">¶</a></h4>
+<p>You practiced simple system calls in the last lab.
+Now, You need to extend them.</p>
+<div class="section" id="trapframe">
+<h5>Trapframe<a class="headerlink" href="#trapframe" title="本標題的永久連結">¶</a></h5>
+<p>When user task enter kernel mode, it saves registers on the top of its kernel stack.
+We name it as <strong>trapframe</strong>.</p>
+<p>Trapframe is useful for passing information between user and kernel mode.</p>
+<ul class="simple">
+<li><p>User can set registers to be parameters and system call number.
+After system call into kernel, kernel can read the content from trapframe.</p></li>
+<li><p>Kernel can set the content of trapframe.
+After return to user, user get the return value and error number from the restored registers.</p></li>
+</ul>
+</div>
+<div class="section" id="system-call-hierachy">
+<h5>System call hierachy<a class="headerlink" href="#system-call-hierachy" title="本標題的永久連結">¶</a></h5>
+<p>System calls are usually implemented with hierachy.
+Here, we use <code class="docutils literal notranslate"><span class="pre">get_taskid</span></code> as an example.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// user program calls the library API.</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Task id: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">get_taskid</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="c1">// user library provided API</span>
+<span class="c1">// system call wrapper for different architectures and operating systems.</span>
+<span class="p">.</span><span class="n">global</span> <span class="n">get_taskid</span>
+<span class="nl">get_taskid</span><span class="p">:</span>
+  <span class="n">mov</span> <span class="n">x8</span><span class="p">,</span> <span class="n">SYS_GET_TASKID</span>
+  <span class="n">svc</span> <span class="mi">0</span>
+  <span class="n">ret</span>
+
+<span class="c1">//----------------enter kernel ---------------</span>
+
+<span class="kt">void</span> <span class="n">el0_svc_handler</span><span class="p">(){</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">get_syscall_no</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">==</span> <span class="n">SYS_GET_TASKID</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">sys_get_taskid</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="n">BUG</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// general interface for all system calls in kernel.</span>
+<span class="c1">// may handle trapframe related things here.</span>
+<span class="kt">int</span> <span class="n">sys_get_taskid</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">set_trap_ret</span><span class="p">(</span><span class="n">do_get_taskid</span><span class="p">());</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// real working space for a system call.</span>
+<span class="c1">// may also be called by other kernel functions.</span>
+<span class="kt">int</span> <span class="n">do_get_taskid</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">current</span> <span class="o">-&gt;</span> <span class="n">taskid</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>It’s just a plain example, you should design it yourself to make it more extensible and more efficient.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>As you can see, a system call may have different function names at different hierachy.
+When a system call appears in the documentation, we use the user library API name in the documentation by default.</p>
+</div>
+</div>
+</div>
+<div class="section" id="i-o-system-calls">
+<h4>I/O system calls<a class="headerlink" href="#i-o-system-calls" title="本標題的永久連結">¶</a></h4>
+<p>I/O devices are shared resources in multiple tasks.
+It might induce data corruption when user tasks access devices themselves.
+I/O related system calls let each user task access I/O device as if it has its own one.
+Kernel should be able to synchronize the I/O requests from different tasks.</p>
+<p>In this lab, You need to implement <code class="docutils literal notranslate"><span class="pre">uart_read</span></code> and <code class="docutils literal notranslate"><span class="pre">uart_write</span></code> for UART I/O access.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-1</span></code> Implement <code class="docutils literal notranslate"><span class="pre">uart_read</span></code> and <code class="docutils literal notranslate"><span class="pre">uart_write</span></code>.</p>
+</div>
+<div class="section" id="exec">
+<h4>Exec<a class="headerlink" href="#exec" title="本標題的永久連結">¶</a></h4>
+<p>A task can call <code class="docutils literal notranslate"><span class="pre">do_exec</span></code> in kernel mode to set up a new user context.
+A system call for <code class="docutils literal notranslate"><span class="pre">do_exec</span></code> for user mode let user task be able to execute in another user context.
+Hence, you need a system call <code class="docutils literal notranslate"><span class="pre">exec</span></code> to wrap <code class="docutils literal notranslate"><span class="pre">do_exec</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-2</span></code> Implement <code class="docutils literal notranslate"><span class="pre">exec</span></code>.</p>
+</div>
+<div class="section" id="fork">
+<h4>Fork<a class="headerlink" href="#fork" title="本標題的永久連結">¶</a></h4>
+<p>User task can be created by forking another user task.
+The caller of fork is parent and the newly created task is child.
+The return value for <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">fork()</span></code> should be different from parent and child.</p>
+<ul class="simple">
+<li><p>Parent’s return value is child’s task id.</p></li>
+<li><p>Child’s return value is 0.</p></li>
+</ul>
+<p>Kernel should allocate new task struct and kernel stack for child.
+Also, parent’s user context should be copied to child’s.
+But you should <strong>modify the trapframe to make the return value different</strong>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-3</span></code> Implement <code class="docutils literal notranslate"><span class="pre">fork</span></code>.</p>
+</div>
+<div class="section" id="exit">
+<h4>Exit<a class="headerlink" href="#exit" title="本標題的永久連結">¶</a></h4>
+<p>After a task finish its job, it calls exit to release all the resource it has.
+In the future lab, the resource owned by task is dynamically allocated, the kernel stack of task is, too.
+It’s hard for a task to release its stack when it need the stack to do the releasing job.
+So, a exited task should <strong>release most of its resource but keepping the kernel stack and task struct</strong>.
+Then, it <strong>set its state to be zombie state and won’t be scheduled again</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>Privilege task and user task share the common exit call in kernel, but you should provide a system call for user task.</p>
+</div>
+<div class="section" id="zombie-reaper">
+<h5>Zombie reaper<a class="headerlink" href="#zombie-reaper" title="本標題的永久連結">¶</a></h5>
+<p>A task becomes zombie after it exit, a zombie reaper is here to reclaim the remaining allocated resource for zombie task.
+Zombie reaper could be implemented by</p>
+<ul class="simple">
+<li><p>A privilege_task that always check if there are zombie tasks. (Easier)</p></li>
+<li><p>Each task has its parent task, the parent should use wait function to check and reap zombie child task.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4-4</span></code> Implement <code class="docutils literal notranslate"><span class="pre">exit</span></code> and zombie reaper by one of the above methods.</p>
+</div>
+</div>
+<div class="section" id="required-system-calls-summary">
+<h4>Required system calls summary<a class="headerlink" href="#required-system-calls-summary" title="本標題的永久連結">¶</a></h4>
+<dl class="simple">
+<dt>size_t uart_read(char buf[], size_t size)</dt><dd><p>Read <strong>size</strong> byte to user provided buffer <strong>buf</strong> and return the how many byte read.</p>
+</dd>
+<dt>size_t uart_write(const char buf[], size_t size)</dt><dd><p>Write <strong>size</strong> byte from user provided buffer <strong>buf</strong> and return the how many byte writen.</p>
+</dd>
+<dt><strong>int exec(void(*func)())</strong></dt><dd><p>System call for <code class="docutils literal notranslate"><span class="pre">do_exec</span></code> , user context is replace by the provided one.</p>
+</dd>
+<dt><strong>int fork()</strong></dt><dd><p>Fork a new user task.</p>
+</dd>
+<dt><strong>void exit(int status)</strong></dt><dd><p>User task exit with status code.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="test-cases">
+<h3>Test cases<a class="headerlink" href="#test-cases" title="本標題的永久連結">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2</span></code> should be tested by the following code or logic equivelent code.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">foo</span><span class="p">(){</span>
+  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Task id: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">current</span> <span class="o">-&gt;</span> <span class="n">taskid</span><span class="p">);</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">1000000</span><span class="p">);</span>
+    <span class="n">schedule</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">idle</span><span class="p">(){</span>
+  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+    <span class="n">schedule</span><span class="p">();</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">1000000</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="c1">// boot setup</span>
+  <span class="c1">// ...</span>
+
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// N should &gt; 2</span>
+    <span class="n">privilege_task_create</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="n">idle</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">4</span></code>  should be tested by the following code or logic equivelent code.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">foo</span><span class="p">(){</span>
+  <span class="kt">int</span> <span class="n">tmp</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Task %d after exec, tmp address 0x%x, tmp value %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">get_taskid</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">tmp</span><span class="p">,</span> <span class="n">tmp</span><span class="p">);</span>
+  <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">fork</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">fork</span><span class="p">();</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">100000</span><span class="p">);</span>
+    <span class="n">fork</span><span class="p">();</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">cnt</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Task id: %d, cnt: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">get_taskid</span><span class="p">(),</span> <span class="n">cnt</span><span class="p">);</span>
+      <span class="n">delay</span><span class="p">(</span><span class="mi">100000</span><span class="p">);</span>
+      <span class="o">++</span><span class="n">cnt</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Should not be printed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Task %d before exec, cnt address 0x%x, cnt value %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">get_taskid</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">cnt</span><span class="p">,</span> <span class="n">cnt</span><span class="p">);</span>
+    <span class="n">exec</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// -----------above is user code-------------</span>
+<span class="c1">// -----------below is kernel code-------------</span>
+
+<span class="kt">void</span> <span class="nf">user_test</span><span class="p">(){</span>
+  <span class="n">do_exec</span><span class="p">(</span><span class="n">test</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">idle</span><span class="p">(){</span>
+  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">num_runnable_tasks</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">schedule</span><span class="p">();</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">1000000</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Test finished</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="c1">// boot setup</span>
+  <span class="c1">// ...</span>
+
+  <span class="n">privilege_task_create</span><span class="p">(</span><span class="n">user_test</span><span class="p">);</span>
+
+  <span class="n">idle</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<ul class="simple">
+<li><p>If you have your own testing code and not sure if they are valid, you can paste your testing code on gitter’s discussion room.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="elective">
+<h2>Elective<a class="headerlink" href="#elective" title="本標題的永久連結">¶</a></h2>
+<p>In the elective part, you should <strong>enable interrupt except some critical regions</strong> in EL1.
+Otherwise, you won’t get any score.</p>
+<div class="section" id="signal">
+<h3>Signal<a class="headerlink" href="#signal" title="本標題的永久連結">¶</a></h3>
+<p>Signal is a short communication mechanism between user tasks.
+When task A want to send a signal S to task B,
+A use system call to kernel, and kernel set signal related data structure in B’s task struct.
+B check its pending signal in kernel mode and it has different handler for different signals.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kill(pid,</span> <span class="pre">signal)</span></code> is the library API to send a signal in POSIX.
+You need to implement corresponding system call and pass the information to kernel.
+The only signal you need to implement is SIGKILL.
+After a user task check its pending signal containing SIGKILL in kernel mode, it kills itself and becomes zombie.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Implement <code class="docutils literal notranslate"><span class="pre">kill</span></code> and signal handler for SIGKILL.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You don’t implement signal handler in user mode in this lab.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> Consider the following POSIX signal example code. Can you elaborate how to design the kernel to support it?</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp"></span>
+
+<span class="kt">void</span> <span class="nf">handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Hello</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
+  <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+  <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+  <span class="n">buf</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Bye %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="priority-based-scheduler">
+<h3>Priority based scheduler<a class="headerlink" href="#priority-based-scheduler" title="本標題的永久連結">¶</a></h3>
+<p>There are important and trivial things in real life, so as in operating system.
+An idle task can’t share the same amount of time as a task handling brake system of your car.
+Hence, tasks need to be prioritized.</p>
+<p>Priority based scheduler select task according to priority of tasks.
+Tasks with the same priority will be scheduled in round robin.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2</span></code> Implement a priority based scheduler.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>Set idle task’s priority to the lowest.</p>
+</div>
+</div>
+<div class="section" id="wait-for-event">
+<h3>Wait for event<a class="headerlink" href="#wait-for-event" title="本標題的永久連結">¶</a></h3>
+<p>Sometimes, user task need blocking read from peripherals.
+It might induce a long and unpredictable times for a system call handling in kernel.
+Although you can voluntarily context switch to other tasks when there is no data comes in,
+you would get a very long runqueue for different tasks waiting for different things.
+It increase the cost of context switch and redundent scheduling.</p>
+<p>Interrupt handler here could help us again.
+You could maintain a wait queue for a certain event.
+If a task is waiting for it, it would be removed from the runqueue and join the wait queue.
+Also, the task’s status would become sleep(block/wait) and waiting for event.
+The event would be trigger in certain function such as interrupt handler or trigger by other tasks.
+They’ll will put tasks in wait queue back to runqueue, and the tasks could proceed.</p>
+<p><strong>Wait for UART read</strong></p>
+<p>UART is a typical example for wait queue.
+When a task call for uart_read,
+you should put it into the wait queue if there is no data to be read.
+In the uart read interrupt handler, it can put the task back to runqueue and the task could read bytes from buffer after getting scheduled.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3</span></code> Implement a wait queue for uart reading.</p>
+</div>
+<div class="section" id="lock">
+<h3>Lock<a class="headerlink" href="#lock" title="本標題的永久連結">¶</a></h3>
+<p>There are several shared resources inside kernel such as allocators, queues and peripherals.
+When multiple threads modify the same object, it’s possible that the object would be corrupted.
+Therefore, you need a lock to guarantee that accesses to the object are safe.</p>
+<div class="section" id="mutex">
+<h4>mutex<a class="headerlink" href="#mutex" title="本標題的永久連結">¶</a></h4>
+<p>Mutex provides mutual exclusive access to an object.
+If one succeed to acquire the lock, it can proceed and release after the operation is done.
+Otherwise, it would be block and sleep until someone release the lock and it will try again to acquire the lock.</p>
+</div>
+<div class="section" id="atomic-operation">
+<h4>atomic operation<a class="headerlink" href="#atomic-operation" title="本標題的永久連結">¶</a></h4>
+<p>Armv8-A provides <code class="docutils literal notranslate"><span class="pre">ldxr</span></code> and <code class="docutils literal notranslate"><span class="pre">stxr</span></code> for exclusive access.
+You can either use compiler’s built-in function or hand written assembly.
+However, you need to enable MMU and data cache before using the <code class="docutils literal notranslate"><span class="pre">ldxr</span></code> instruction in real rpi3.
+So, you can now use a workaround such as disable preemption in real rpi3 or just give it a trial in QEMU which doesn’t have to enable MMU for <code class="docutils literal notranslate"><span class="pre">ldxr</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4</span></code> Implement <code class="docutils literal notranslate"><span class="pre">mutex_lock</span></code>, <code class="docutils literal notranslate"><span class="pre">mutex_unlock</span></code>. If task fail to acquire the lock, it would go to sleep and context switch to other tasks.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> Can you prevent all possible context switch by disabling interrupt?</p>
+</div>
+</div>
+<div class="section" id="preemtive-kernel">
+<h3>Preemtive kernel<a class="headerlink" href="#preemtive-kernel" title="本標題的永久連結">¶</a></h3>
+<p>Kernel provides system calls for user tasks.
+When a low priority task call a system call with long execution time.
+High priority task would still be blocked even it becomes runnanble from sleep.
+A preemptive kernel could be preempted after interrupt handling.
+Hence, when an interrupt handler put a higher priority task from wait queue to runqueue, it can be immediately be scheduled.
+It’s an important trait for real time tasks.</p>
+<p>Preemtive kernel could be easily implemented by checking reschedule flag at the end of ISR.
+However, the tricky part of preemptive kernel is you should be awared about critical region.
+Otherwise, your data may be corrupted by another kernel routine.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">5</span></code> Let kernel could be preempted without explicit calling schedule.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">3</span></code> Do you think microkernel need to be preemptive kernel or not? Why or why not?</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lab3.html" class="btn btn-neutral float-left" title="Lab 3 : Exception and Interrupt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
