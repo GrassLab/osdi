@@ -704,6 +704,10 @@ After a user task check its pending signal containing SIGKILL in kernel mode, it
     printf("Bye %s\n", buf);
   }
 
+.. hint::
+  In ``question 1`` you should explain the signal mechanism in 3 parts, **signal registration**, **signal generation**, and **signal delivery**, you can refer to 
+  `IMPLEMENTATION OF SIGNAL HANDLING <http://courses.cms.caltech.edu/cs124/lectures-wi2016/CS124Lec15.pdf>`_
+
 Priority based scheduler
 ==========================
 
