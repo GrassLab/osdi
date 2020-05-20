@@ -1,0 +1,495 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 6 : Allocator &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜尋" href="../search.html" />
+    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="prev" title="Lab 5 : Virtual memory" href="lab5.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3 : Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4 : Multitasking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5 : Virtual memory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 6 : Allocator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#static-vs-dynamic-memory-pool">Static vs Dynamic Memory Pool</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#static-memory-pool">Static memory pool</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dynamic-memory-pool">Dynamic memory pool</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-vs-varied-sized-allocator">Fixed vs Varied Sized Allocator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-pool-allocator-vs-object-allocator">Memory Pool Allocator vs Object Allocator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#observability-of-allocators">Observability of Allocators</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#required">Required</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#before-requirements">Before Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buddy-system">Buddy System</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#search-for-a-proper-block">Search for a proper block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coalesce-the-free-block">Coalesce the free block</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#object-allocator">Object Allocator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fixed-sized-allocator">Fixed-sized allocator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#varied-sized-allocator">Varied-sized allocator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#elective">Elective</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#startup-allocator">Startup allocator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#refactor-your-code">Refactor your code</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/mailbox.html">Mailbox</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 6 : Allocator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab6.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-6-allocator">
+<h1>Lab 6 : Allocator<a class="headerlink" href="#lab-6-allocator" title="本標題的永久連結">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="本標題的永久連結">¶</a></h2>
+<p>In all previous labs, you implement a static memory allocator for each class of objects.
+You may partition a huge amount of memory for one class of objects without actually allocating it.
+Therefore, the kernel wastes part of the memory.
+Also, for general-purpose OS, the amount of memory and the maximum objects users need are unknown at compile time.
+Hence, a dynamic memory allocator is necessary to solve these problems.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>Starting from lab 6 to lab 8, the <code class="docutils literal notranslate"><span class="pre">required</span></code> part will only run in single thread and you can finish these labs
+without <strong>interrupt</strong>, <strong>multitasking</strong>, and <strong>virtual memory</strong>.</p>
+<p>However, the <code class="docutils literal notranslate"><span class="pre">elective</span></code> and <code class="docutils literal notranslate"><span class="pre">question</span></code> parts will still related the topics you have done in all previous labs.</p>
+</div>
+</div>
+<div class="section" id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="本標題的永久連結">¶</a></h2>
+<ul class="simple">
+<li><p>Understand how to design a startup memory allocator.</p></li>
+<li><p>Implement the buddy system for contiguous page frame allocation.</p></li>
+<li><p>Understand how to design an object allocator.</p></li>
+<li><p>Replace the original static memory allocator by the new dynamic memory allocator.</p></li>
+</ul>
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="static-vs-dynamic-memory-pool">
+<h3>Static vs Dynamic Memory Pool<a class="headerlink" href="#static-vs-dynamic-memory-pool" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="static-memory-pool">
+<h4>Static memory pool<a class="headerlink" href="#static-memory-pool" title="本標題的永久連結">¶</a></h4>
+<p>The memory pool is partitioned on .bss at compile time.
+Hence, the amount of usable memory is fixed at runtime.
+It’s good for a small memory platform or deterministic system.</p>
+</div>
+<div class="section" id="dynamic-memory-pool">
+<h4>Dynamic memory pool<a class="headerlink" href="#dynamic-memory-pool" title="本標題的永久連結">¶</a></h4>
+<p>The memory pool’s location is determined at runtime.</p>
+<p>In user programs, the memory pool is usually allocated through system calls.
+Once the memory is used up, the library calls <code class="docutils literal notranslate"><span class="pre">brk()</span></code> or <code class="docutils literal notranslate"><span class="pre">mmap()</span></code> to gain new virtual memory region.
+And the physical memory is allocated when the user access the region and the kernel will create the page mapping.</p>
+<p>In kernels, memory pools are usually in the form of contgnuous page frame.
+Once, the memory is used up, the kernel allocates another contiguous page frame.</p>
+</div>
+</div>
+<div class="section" id="fixed-vs-varied-sized-allocator">
+<h3>Fixed vs Varied Sized Allocator<a class="headerlink" href="#fixed-vs-varied-sized-allocator" title="本標題的永久連結">¶</a></h3>
+<p>A memory pool is a big memory region, the memory allocator needs to cut the pool into chunks for each allocation call.</p>
+<p>For typed programming language, the size of an object is known and the allocator can allocate the size fit to the object to reduce external fragmentation.
+However, each class of object needs its memory pool in the fixed-sized allocator.
+If the object is seldom used, there is internal fragmentation.</p>
+<p>Hence, varied-sized allocators such as <code class="docutils literal notranslate"><span class="pre">malloc()</span></code> keep the record of each allocated data chunk’s size to support varied length allocation.</p>
+</div>
+<div class="section" id="memory-pool-allocator-vs-object-allocator">
+<h3>Memory Pool Allocator vs Object Allocator<a class="headerlink" href="#memory-pool-allocator-vs-object-allocator" title="本標題的永久連結">¶</a></h3>
+<p>In user programs, the memory pool is usually allocated through system calls.
+Hence, even the library doesn’t need to worry about how to get or expand its memory pool.
+It only needs to take care of how to bookkeep the use of the memory pool and the allocated chunks.</p>
+<p>In kernels, the memory pool allocation should be done itself and usually by page allocator.
+In the last lab, you already implement a simple page allocator.
+In this lab, you’ll implement the <a class="reference internal" href="#buddy"><span class="std std-ref">Buddy System</span></a> for page allocation to create memory pools with different sizes.</p>
+<p>With a memory pool, objects can be allocated from it.
+You should design your <a class="reference internal" href="#alloc"><span class="std std-ref">Object Allocator</span></a> in this lab.</p>
+</div>
+<div class="section" id="observability-of-allocators">
+<h3>Observability of Allocators<a class="headerlink" href="#observability-of-allocators" title="本標題的永久連結">¶</a></h3>
+<p>Comparing to previous labs, the internal state of the memory allocator is hard to be observed and hence hard to demo.
+To check the correctness of your allocator, you need to <strong>print the log of each allocation and free</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>TAs will verify the correctness by these logs in demo.</p>
+</div>
+</div>
+</div>
+<div class="section" id="required">
+<h2>Required<a class="headerlink" href="#required" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="before-requirements">
+<h3>Before Requirements<a class="headerlink" href="#before-requirements" title="本標題的永久連結">¶</a></h3>
+<p>General-purpose kernels don’t know how many page descriptors should be statically allocated at compile-time because users may change the hardware.
+Hence, it needs a startup allocator for dynamically allocating the page’s descriptor array.</p>
+<p>However the size of rpi3’s physical memory is a known fact,
+Therefore, we left the <a class="reference internal" href="#startup-alloc"><span class="std std-ref">Startup allocator</span></a> as elective but you can still start from implementing it.</p>
+</div>
+<div class="section" id="buddy-system">
+<span id="buddy"></span><h3>Buddy System<a class="headerlink" href="#buddy-system" title="本標題的永久連結">¶</a></h3>
+<p>Buddy system is a well-known and simple algorithm for allocating memory block but with the internal fragmentation problem.
+But, it’s still suitable for page allocation because the internal fragmentation problem can be solved by object allocator.
+We provide one possible implementation in the following part.
+You can still devise it yourself as long as you follow the specification of the buddy system allocator.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1</span></code> Implement the buddy system for contiguous pages allocation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> Is buddy allocator perfectly eliminate external fragmentation? If yes, prove it? If no, give an external fragmentation example.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<ul class="simple">
+<li><p><strong>page allocation</strong> here means page frame (physical memory) allocation. It means the allocation unit is 4KB.</p></li>
+<li><p>You don’t need to handle the out-of-memory failure, just return NULL and print the failed log.</p></li>
+</ul>
+</div>
+<div class="section" id="search-for-a-proper-block">
+<h4>Search for a proper block<a class="headerlink" href="#search-for-a-proper-block" title="本標題的永久連結">¶</a></h4>
+<p>The user provides the block size as arguments to buddy allocator.
+The buddy allocator should find a large enough block in the buddy system.</p>
+<p>You can implement it by <a class="reference internal" href="#linkedlist"><span class="std std-ref">Linked-lists for blocks with different size</span></a> and <a class="reference internal" href="#release-redu"><span class="std std-ref">Release redundant memory block</span></a></p>
+<div class="section" id="linked-lists-for-blocks-with-different-size">
+<span id="linkedlist"></span><h5>Linked-lists for blocks with different size<a class="headerlink" href="#linked-lists-for-blocks-with-different-size" title="本標題的永久連結">¶</a></h5>
+<p>Buddy system is allocated by the power of 2.
+You can set a maximum order and create one linked-list for each order.
+The linked-list links free block with the same size.
+The buddy allocator’s search starts from the specified block size list.
+If the list is empty, it tries to find a larger block in the higher-order block list
+If there are no more contiguous page frames in the higher-order block list, it returns NULL.</p>
+</div>
+<div class="section" id="release-redundant-memory-block">
+<span id="release-redu"></span><h5>Release redundant memory block<a class="headerlink" href="#release-redundant-memory-block" title="本標題的永久連結">¶</a></h5>
+<p>The above algorithm may allocate one block far larger than the required size.
+The allocator will cut off the bottom half the block and put it back to the buddy system until the size equals to the required size.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You should print the log of releasing redundant memory block for demo</p>
+</div>
+</div>
+</div>
+<div class="section" id="coalesce-the-free-block">
+<h4>Coalesce the free block<a class="headerlink" href="#coalesce-the-free-block" title="本標題的永久連結">¶</a></h4>
+<p>To make the buddy system contains larger contiguous memory blocks.
+When the user frees the allocated memory block, the buddy allocator should not naively put it back to the linked-list.
+It should try to <a class="reference internal" href="#find-buddy"><span class="std std-ref">Find the buddy</span></a> and try to <a class="reference internal" href="#merge-iter"><span class="std std-ref">Merge iteratively</span></a>.</p>
+<div class="section" id="find-the-buddy">
+<span id="find-buddy"></span><h5>Find the buddy<a class="headerlink" href="#find-the-buddy" title="本標題的永久連結">¶</a></h5>
+<p>The page frame number(PFN) and the block size order can be used to find the page frame’s buddy.
+For example, if a memory block’s PFN is 8 and the block size is 16KB (order = 2) you can find its buddy by
+0b1000 xor 0b100 = 0b1100 = 12.</p>
+<p>However, <strong>it’s not guaranteed that the buddy’s page descriptor you get in the buddy system</strong>.
+Even it’s in the buddy system, it’s block size may not be the same as the free one because the tail of it may be allocated.
+Hence, you need to check that the buddy descriptor you found is in the buddy system and the size is the same as the free one.
+If it’s indeed a buddy, you can merge them into one block.</p>
+</div>
+<div class="section" id="merge-iteratively">
+<span id="merge-iter"></span><h5>Merge iteratively<a class="headerlink" href="#merge-iteratively" title="本標題的永久連結">¶</a></h5>
+<p>There is still a possible buddy for the merged block.
+You should use the same way to find the buddy of the merge block.
+When you can’t find the buddy of the merged block or the merged block size is maximum-block-size,
+the allocator stops and put the merged block to the linked-list.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You should print the log of merge iteration for demo.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="object-allocator">
+<span id="alloc"></span><h3>Object Allocator<a class="headerlink" href="#object-allocator" title="本標題的永久連結">¶</a></h3>
+<p>Page allocator is your memory pool allocator.
+Now, you can implement the object allocator.
+You need to implement both fixed-sized allocator and varied-sized allocator.</p>
+<div class="section" id="fixed-sized-allocator">
+<h4>Fixed-sized allocator<a class="headerlink" href="#fixed-sized-allocator" title="本標題的永久連結">¶</a></h4>
+<div class="section" id="registration">
+<h5>Registration<a class="headerlink" href="#registration" title="本標題的永久連結">¶</a></h5>
+<p>The fixed-size allocator cut the memory pool into chunks with the size the same as the size of the object.
+Hence, you need to provide an API for users to register the allocator for certain object classes.
+And the API returns a token to the caller.
+With the token, the user can ask the allocator to allocate one object from the corresponding pool for that class.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-1</span></code> Implement the API for register a fixed-size allocator.</p>
+</div>
+<div class="section" id="allocate">
+<h5>Allocate<a class="headerlink" href="#allocate" title="本標題的永久連結">¶</a></h5>
+<p>After the allocator gets one request from the user.
+It does the following things.</p>
+<ol class="arabic simple">
+<li><p>Check the token and find the memory pool.</p></li>
+<li><p>If the memory pool is empty, allocate page frames.</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Initialize the memory pool for bookkeeping.</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Find empty slot in the memory pool and return it to user</p></li>
+</ol>
+</div>
+<div class="section" id="free">
+<h5>Free<a class="headerlink" href="#free" title="本標題的永久連結">¶</a></h5>
+<p>The user frees the object by passing the address of the object as an argument to the allocator.
+The allocator should look up its internal data structure and put the object to the right pool.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-2</span></code> Implement the API for allocate and free for fixed-size object.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> If the registered object size is 2049 byte, one page frame can only fit in one object. Hence the internal fragmentation is around 50%.
+How to decrease the percentage of the internal fragmentation in this case?</p>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<ul class="simple">
+<li><p>The prefix of the address of the allocated object will be the PFN of the memory pool that allocated the object.
+You can look up the memory pool by it.</p></li>
+<li><p>The bookkeeping of memory pool can be done by either list or bit array.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="varied-sized-allocator">
+<h4>Varied-sized allocator<a class="headerlink" href="#varied-sized-allocator" title="本標題的永久連結">¶</a></h4>
+<p>In some cases, an object should be dynamically allocated but it’s not frequently used.
+It’s wasteful to prepare a dedicated memory pool for it.
+Also, an untyped allocator is easier to use.</p>
+<p>The implementation of varied-sized allocator can be simply as create several fixed-sized allocators.
+The varied-sized allocator works as a proxy of page allocator and fixed-sized allocator.
+If the allocated size is very big, it calls page allocator directly to allocate contiguous page frames.
+Otherwise, it rounds up the allocated size to one of the registered allocators and uses the token to the fixed-sized allocator.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3</span></code> Implement a varied-sized allocator.</p>
+</div>
+</div>
+</div>
+<div class="section" id="elective">
+<h2>Elective<a class="headerlink" href="#elective" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="startup-allocator">
+<span id="startup-alloc"></span><h3>Startup allocator<a class="headerlink" href="#startup-allocator" title="本標題的永久連結">¶</a></h3>
+<p>The dynamic allocator relies on the page allocator.
+The page allocator relies on the page array.
+The page array relies on dynamic allocation at runtime.</p>
+<p>Then it introduces the chicken or the egg problem.
+To break the dilemma, you need a dedicated allocator for the startup time allocation.</p>
+<p>In the early stage of booting, the kernel can get the amount of RAM and the memory hole through the message from the device tree, BIOS, ACPI, or bootloader.
+Then, the physical memory can be divided into several large regions.
+The startup allocator can simply bookkeep the information of the region’s start and end.
+Then it can use a small amount of memory to describe a huge amount of physical memory.</p>
+<p>Again, it needs descriptors for bookkeeping.
+You can statically allocate a small size descriptors』 array.
+And the array can grow up at runtime by recording and allocating a larger array in the old array.
+Then copy the information to the new array.
+Therefore, it can bootstrap to manage all region’s information.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Implement the startup allocator.</p>
+</div>
+<div class="section" id="refactor-your-code">
+<h3>Refactor your code<a class="headerlink" href="#refactor-your-code" title="本標題的永久連結">¶</a></h3>
+<p>With the dynamic allocator, you can depreciate your legacy static memory allocator.
+Hence, the .bss section size should be relatively small.
+You should use <code class="docutils literal notranslate"><span class="pre">nm</span> <span class="pre">--size-sort</span> <span class="pre">-S</span> <span class="pre">kernel8.elf</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">-i</span> <span class="pre">&quot;</span> <span class="pre">b</span> <span class="pre">&quot;</span></code> to check your .bss
+The largest one should not be greater than 1KB.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2</span></code> Replace the static memory allocator with the dynamic memory allocator in your kernel.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">3</span></code> What’s the benefit to prevent static allocation?</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lab5.html" class="btn btn-neutral float-left" title="Lab 5 : Virtual memory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="next" title="Lab 6 : Allocator" href="lab6.html" />
     <link rel="prev" title="Lab 4 : Multitasking" href="lab4.html" /> 
 </head>
 
@@ -159,6 +159,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6 : Allocator</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul>
@@ -272,9 +273,9 @@ Hence, it provides different levels of translation.</p>
 </div>
 <div class="section" id="page-vs-page-frame-vs-page-table">
 <h4>Page vs Page frame vs Page table<a class="headerlink" href="#page-vs-page-frame-vs-page-table" title="Permalink to this headline">¶</a></h4>
-<p><strong>Page</strong> : A chunck of virtual memory pointed by one entry of PTE.</p>
-<p><strong>Block</strong> : A chunck of virtual memory pointed by one entry of PUD or PMD.</p>
-<p><strong>Page frame</strong> : A chunck of physical memory.</p>
+<p><strong>Page</strong> : A chunk of virtual memory pointed by one entry of PTE.</p>
+<p><strong>Block</strong> : A chunk of virtual memory pointed by one entry of PUD or PMD.</p>
+<p><strong>Page frame</strong> : A chunk of physical memory.</p>
 <p><strong>Page table</strong> : A page frame whose entries point to the next level page tables, blocks, or pages .
 In this documentation, PGD, PUD, PMD and PTE are all called page table.</p>
 </div>
@@ -838,7 +839,7 @@ Memory regions for <strong>.bss</strong> and <strong>user stack</strong> can be 
 <blockquote>
 <div><ul class="simple">
 <li><p>MAP_FIXED: New region’s start should be <strong>addr</strong>, or the <code class="docutils literal notranslate"><span class="pre">mmap</span></code> is failed</p></li>
-<li><p>MAP_ANONYMOUS: New region is mapped to anonymous page. It’s usaully used for stack and heap.</p></li>
+<li><p>MAP_ANONYMOUS: New region is mapped to anonymous page. It’s usually used for stack and heap.</p></li>
 <li><p>MAP_POPULATE: After <code class="docutils literal notranslate"><span class="pre">mmap</span></code>, it directly do <a class="reference internal" href="#region-map"><span class="std std-ref">Region page mapping</span></a>.(You don’t have to implement it if you implement demand paging)</p></li>
 </ul>
 </div></blockquote>
@@ -911,7 +912,7 @@ The following are struct member you need to use for loading a statically linking
 <li><p><strong>p_offset</strong>: The offset to start of ELF.</p></li>
 <li><p><strong>p_align</strong>: <strong>p_vaddr</strong> <span class="math notranslate nohighlight">\(\equiv\)</span> <strong>p_offset</strong> (mod <strong>p_align</strong>)</p></li>
 <li><p><strong>p_filesz</strong>: The file size, contains .text, .data, etc.</p></li>
-<li><p><strong>p_memsz</strong>: The memory size of the segment. It usualy equals to <strong>p_filesz</strong>. If the segment contains .bss, it should be larger than <strong>p_filesz</strong></p></li>
+<li><p><strong>p_memsz</strong>: The memory size of the segment. It usually equals to <strong>p_filesz</strong>. If the segment contains .bss, it should be larger than <strong>p_filesz</strong></p></li>
 <li><p><strong>p_flags</strong>: The extra flags, you only need to care about rwx.</p></li>
 </ul>
 <div class="admonition note">
@@ -1122,7 +1123,7 @@ If you don’t follow it, you need to guarantee that your testing code meet our 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="lab6.html" class="btn btn-neutral float-right" title="Lab 6 : Allocator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="lab4.html" class="btn btn-neutral float-left" title="Lab 4 : Multitasking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

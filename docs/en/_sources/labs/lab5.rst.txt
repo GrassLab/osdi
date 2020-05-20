@@ -57,11 +57,11 @@ Hence, it provides different levels of translation.
 Page vs Page frame vs Page table
 ----------------------------------
 
-**Page** : A chunck of virtual memory pointed by one entry of PTE.
+**Page** : A chunk of virtual memory pointed by one entry of PTE.
 
-**Block** : A chunck of virtual memory pointed by one entry of PUD or PMD.
+**Block** : A chunk of virtual memory pointed by one entry of PUD or PMD.
 
-**Page frame** : A chunck of physical memory.
+**Page frame** : A chunk of physical memory.
 
 **Page table** : A page frame whose entries point to the next level page tables, blocks, or pages .
 In this documentation, PGD, PUD, PMD and PTE are all called page table.
@@ -729,7 +729,7 @@ API specification
 
     * MAP_FIXED: New region's start should be **addr**, or the ``mmap`` is failed
 
-    * MAP_ANONYMOUS: New region is mapped to anonymous page. It's usaully used for stack and heap.
+    * MAP_ANONYMOUS: New region is mapped to anonymous page. It's usually used for stack and heap.
 
     * MAP_POPULATE: After ``mmap``, it directly do :ref:`region_map`.(You don't have to implement it if you implement demand paging)
 
@@ -810,7 +810,7 @@ Program header
 
 * **p_filesz**: The file size, contains .text, .data, etc.
 
-* **p_memsz**: The memory size of the segment. It usualy equals to **p_filesz**. If the segment contains .bss, it should be larger than **p_filesz**
+* **p_memsz**: The memory size of the segment. It usually equals to **p_filesz**. If the segment contains .bss, it should be larger than **p_filesz**
 
 * **p_flags**: The extra flags, you only need to care about rwx.
 
