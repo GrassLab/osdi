@@ -391,7 +391,7 @@ Page frames are valuable resource and can be used for different purposes such as
 
 Same as ``struct task`` , you need to design your own ``struct page``.
 Each ``struct page`` refer to one page frame.
-Your kernel bookkeeps the the use of the page frame in ``struct page``.
+Your kernel bookkeeps the use of the page frame in ``struct page``.
 
 
 ``required 2-1`` Implement page bookkeeping.
@@ -497,7 +497,7 @@ The user library also need to provide **common functions** such as print, memory
 These functions may rely on system calls, user library should wrap it and hide the details for programmers.
 Programmers only need to write the main function and link to the library for other utilities.
 
-``required 3-1`` Implement a minimum user library.
+``required 3-2`` Implement a minimum user library.
 
 
 Implement shell as an user program
@@ -514,7 +514,9 @@ The following picture shows how to create 0 initialized data to .data.
 
 .. image:: img/lab5_3.png
 
-``required 3-2`` Implement shell as an user program and use **objcopy** to turn the ELF file into a raw binary.
+``required 3-3`` Implement shell as an user program and use **objcopy** to turn the ELF file into a raw binary.
+
+.. _embed:
 
 Embed compiled binary to kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -547,7 +549,7 @@ It creates an linkable binary object with 3 symbols,
 
 .. image:: img/lab5_2.png
 
-``required 3-3`` Embed your shell binary to kernel image.
+``required 3-4`` Embed your shell binary to kernel image.
 
 Raw binary loading and mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -586,7 +588,7 @@ Change your user stack implementation to:
   
   * You should map the address to the allocated page frame.
 
-``required 3-4`` Allocate one page frame for user stack and map user task's stack to the common address.
+``required 3-5`` Allocate one page frame for user stack and map user task's stack to the common address.
 
 .. note::
   Currently, kernel stacks are still statically declared and allocated.
@@ -611,7 +613,7 @@ Also, a TLB invalidation is need because the old values are staled.
   dsb ish // ensure completion of TLB invalidatation
   isb // clear pipeline
 
-``required 3-4`` Set TTBR0_EL1 to switch between different address space when context switch.
+``required 3-6`` Set TTBR0_EL1 to switch between different address space when context switch.
 
 Requirement 4
 ==============

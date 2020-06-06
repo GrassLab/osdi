@@ -1,0 +1,921 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 7 : Virtual File System &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜尋" href="../search.html" />
+    <link rel="next" title="Lab 8 : File System Meets Hardware" href="lab8.html" />
+    <link rel="prev" title="Lab 6 : Allocator" href="lab6.html" />
+ 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-167313793-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-167313793-1');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3 : Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4 : Multitasking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5 : Virtual memory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6 : Allocator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 7 : Virtual File System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tree-structure">Tree structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#terminology">Terminology</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#file-system">file system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vnode">vnode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#component-name">component name</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#required">Required</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-1">Requirement 1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#file-system-registration">File system registration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-root-file-system">Create a root file system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-2">Requirement 2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vfs-open">vfs_open</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vfs-close">vfs_close</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-cases">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-3">Requirement 3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vfs-write">vfs_write</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vfs-read">vfs_read</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Test cases</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#elective">Elective</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#read-directories">Read directories</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#vfs-in-a-multitasking-scenario">VFS in a multitasking scenario</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#task-s-vfs-information">Task’s VFS information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#system-calls">System calls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#vfs-with-multiple-layers">VFS with multiple layers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mkdir">mkdir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#chdir">chdir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mount">mount</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pathname-lookup">Pathname lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#procfs">procfs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#read-and-write-internal-state">Read and write internal state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#get-tasks-internal-states">Get tasks』 internal states</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#initramfs">initramfs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cpio-archive">cpio archive</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#load-initial-ramdisk">Load initial ramdisk</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lab8.html">Lab 8 : File System Meets Hardware</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/mailbox.html">Mailbox</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 7 : Virtual File System</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab7.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-7-virtual-file-system">
+<h1>Lab 7 : Virtual File System<a class="headerlink" href="#lab-7-virtual-file-system" title="本標題的永久連結">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="本標題的永久連結">¶</a></h2>
+<p>A file system manages and places the data in storage mediums.
+Each file system has a specific way to store and retrieve the data.
+Hence, a virtual file system(VFS) is common in general-purpose OS to provide a unified interface for all file systems.</p>
+<p>In this lab, you’ll implement a memory-based file system(tmpfs) to get familiar with the concept of VFS.
+In the next lab, you’ll implement a FAT32 file system to access files from an SD card.
+It’s recommended to do both together.</p>
+</div>
+<div class="section" id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="本標題的永久連結">¶</a></h2>
+<ul class="simple">
+<li><p>Understand how to set up a root file system.</p></li>
+<li><p>Understand how to create, open, and close files.</p></li>
+<li><p>Understand how to read and write files.</p></li>
+<li><p>Understand how to mount a file system and look up a file across file systems.</p></li>
+<li><p>Understand how to design VFS for multitasking.</p></li>
+<li><p>Understand how to design procfs.</p></li>
+<li><p>Understand how initramfs works.</p></li>
+</ul>
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="tree-structure">
+<h3>Tree structure<a class="headerlink" href="#tree-structure" title="本標題的永久連結">¶</a></h3>
+<p>A file system is usually hierarchical, and a tree is a suitable data structure to represent it.</p>
+<p>Each <strong>node</strong> represents an entity such as a file or directory in the file system.</p>
+<p>Each <strong>edge</strong> has its name, and it’s stored by one directory.</p>
+<p>There is one <strong>path</strong> between two <strong>nodes</strong>.
+Concatenating all the <strong>edges</strong>』 name on the <strong>path</strong> generates a <strong>pathname</strong>.</p>
+<p>A VFS can parse the <strong>pathname</strong> to traverse from one node to another.</p>
+<p><strong>Example graph</strong></p>
+<img alt="../_images/lab7_0.png" src="../_images/lab7_0.png" />
+</div>
+<div class="section" id="terminology">
+<h3>Terminology<a class="headerlink" href="#terminology" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="file-system">
+<h4>file system<a class="headerlink" href="#file-system" title="本標題的永久連結">¶</a></h4>
+<p>In this documentation, a file system refers to a concrete file system type such as tmpfs, FAT32, etc.
+Virtual file system will be shortened as VFS.</p>
+</div>
+<div class="section" id="vnode">
+<h4>vnode<a class="headerlink" href="#vnode" title="本標題的永久連結">¶</a></h4>
+<p>We call a node in a VFS tree <strong>vnode</strong>.</p>
+<p>For VFS, a vnode is an abstract class.
+The underlying file system should implement the vnode to change the behavior.</p>
+</div>
+<div class="section" id="component-name">
+<h4>component name<a class="headerlink" href="#component-name" title="本標題的永久連結">¶</a></h4>
+<p>A pathname delimits each name by 『/』.
+The name is called <strong>component name</strong>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="required">
+<h2>Required<a class="headerlink" href="#required" title="本標題的永久連結">¶</a></h2>
+<p>In the required part, you need to implement <strong>tmpfs</strong> to understand how VFS works.
+We provide an example VFS code for you.
+It’s up to you to re-design the VFS yourself or modify the provided code.</p>
+<p>The following configuration is specified in the required part to simplify the implementation.</p>
+<ul class="simple">
+<li><p>Each file’s size is less than 512 byte.</p></li>
+<li><p>Only one root directory and regular files under it.</p></li>
+<li><p>Pathname lookup includes only one component name.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">vnode</span> <span class="p">{</span>
+  <span class="k">struct</span> <span class="n">mount</span><span class="o">*</span> <span class="n">mount</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="n">vnode_operations</span><span class="o">*</span> <span class="n">v_ops</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="n">file_operations</span><span class="o">*</span> <span class="n">f_ops</span><span class="p">;</span>
+  <span class="kt">void</span><span class="o">*</span> <span class="n">internal</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">file</span> <span class="p">{</span>
+  <span class="k">struct</span> <span class="n">vnode</span><span class="o">*</span> <span class="n">vnode</span><span class="p">;</span>
+  <span class="kt">size_t</span> <span class="n">f_pos</span><span class="p">;</span> <span class="c1">// The next read/write position of this file descriptor</span>
+  <span class="k">struct</span> <span class="n">file_operations</span><span class="o">*</span> <span class="n">f_ops</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">flags</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">mount</span> <span class="p">{</span>
+  <span class="k">struct</span> <span class="n">vnode</span><span class="o">*</span> <span class="n">root</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="n">filesystem</span><span class="o">*</span> <span class="n">fs</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">filesystem</span> <span class="p">{</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">setup_mount</span><span class="p">)(</span><span class="k">struct</span> <span class="n">filesystem</span><span class="o">*</span> <span class="n">fs</span><span class="p">,</span> <span class="k">struct</span> <span class="n">mount</span><span class="o">*</span> <span class="n">mount</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">file_operations</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)</span> <span class="p">(</span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span><span class="o">*</span> <span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)</span> <span class="p">(</span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">file</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">vnode_operations</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">lookup</span><span class="p">)(</span><span class="k">struct</span> <span class="n">vnode</span><span class="o">*</span> <span class="n">dir_node</span><span class="p">,</span> <span class="k">struct</span> <span class="n">vnode</span><span class="o">**</span> <span class="n">target</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">component_name</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">create</span><span class="p">)(</span><span class="k">struct</span> <span class="n">vnode</span><span class="o">*</span> <span class="n">dir_node</span><span class="p">,</span> <span class="k">struct</span> <span class="n">vnode</span><span class="o">**</span> <span class="n">target</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">component_name</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">mount</span><span class="o">*</span> <span class="n">rootfs</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">register_filesystem</span><span class="p">(</span><span class="k">struct</span> <span class="n">filesystem</span><span class="o">*</span> <span class="n">fs</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// register the file system to the kernel.</span>
+  <span class="c1">// you can also initialize memory pool of the file system here.</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="nf">vfs_open</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">pathname</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 1. Lookup pathname from the root vnode.</span>
+  <span class="c1">// 2. Create a new file descriptor for this vnode if found.</span>
+  <span class="c1">// 3. Create a new file if O_CREAT is specified in flags.</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">vfs_close</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 1. release the file descriptor</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">vfs_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span><span class="o">*</span> <span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 1. write len byte from buf to the opened file.</span>
+  <span class="c1">// 2. return written size or error code if an error occurs.</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">vfs_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">file</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 1. read min(len, readable file data size) byte to buf from the opened file.</span>
+  <span class="c1">// 2. return read size or error code if an error occurs.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="requirement-1">
+<h3>Requirement 1<a class="headerlink" href="#requirement-1" title="本標題的永久連結">¶</a></h3>
+<p>In this requirement, you need to <strong>set up tmpfs as the root file system</strong>.
+The following steps are just recommended if you use the provided code.
+If you devise the VFS yourself, <strong>you don’t have to follow them.</strong></p>
+<div class="section" id="file-system-registration">
+<h4>File system registration<a class="headerlink" href="#file-system-registration" title="本標題的永久連結">¶</a></h4>
+<p>Each file system should register itself and pass its basic information to the VFS.
+Then, users can specify the name of the file system to create a new mount.
+Also, some global resources, such as object memory pools, can be created in registration.</p>
+</div>
+<div class="section" id="create-a-root-file-system">
+<h4>Create a root file system<a class="headerlink" href="#create-a-root-file-system" title="本標題的永久連結">¶</a></h4>
+<div class="section" id="create-a-mount-object">
+<h5>Create a mount object<a class="headerlink" href="#create-a-mount-object" title="本標題的永久連結">¶</a></h5>
+<p>The root file system is at the top of the VFS tree.
+The provided code uses <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">mount</span></code> to represent a mounted file system, so as the root file system.
+You should create a <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">mount</span></code> object and let <code class="docutils literal notranslate"><span class="pre">rootfs</span></code> point to it.</p>
+</div>
+<div class="section" id="root-directory-s-vnode">
+<h5>Root directory’s vnode<a class="headerlink" href="#root-directory-s-vnode" title="本標題的永久連結">¶</a></h5>
+<p>Each mounted file system has its root directory.
+You can create the root directory’s vnode during the mount setup.</p>
+<p>However, the internal representation of each file system’s directory may be different.
+A VFS should call the underlying file system specific method to construct the root directory’s vnode.</p>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">vnode</span> <span class="pre">-&gt;</span> <span class="pre">internal</span></code> to point to the internal representation of a vnode.</p>
+</div>
+</div>
+<div class="section" id="directory-entry">
+<h5>Directory entry<a class="headerlink" href="#directory-entry" title="本標題的永久連結">¶</a></h5>
+<p>A directory holds edges information of a VFS tree.
+Each edges information is stored by one directory entry.</p>
+<p>You should design the directory entry of your tmpfs’s root directory.
+Later on, the VFS should be able to create or find a regular file from directory entries.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1</span></code> Set up tmpfs as the root file system.</p>
+</div>
+</div>
+</div>
+<div class="section" id="requirement-2">
+<h3>Requirement 2<a class="headerlink" href="#requirement-2" title="本標題的永久連結">¶</a></h3>
+<p>In this requirement, you need to implement the following functions for tmpfs.</p>
+<ul class="simple">
+<li><p>Lookup a regular file in the root directory.</p></li>
+<li><p>Create a regular file in the root directory.</p></li>
+<li><p>Open a regular file.</p></li>
+<li><p>Close a regular file.</p></li>
+</ul>
+<div class="section" id="vfs-open">
+<h4>vfs_open<a class="headerlink" href="#vfs-open" title="本標題的永久連結">¶</a></h4>
+<p>Regular files, directories, and device files are vnodes in the VFS tree.</p>
+<p><code class="docutils literal notranslate"><span class="pre">vfs_open</span></code> is the API to open them regardless of the underlying file system and file type.
+Furthermore, a regular file can be created by it.</p>
+<div class="section" id="component-name-lookup">
+<h5>Component name lookup<a class="headerlink" href="#component-name-lookup" title="本標題的永久連結">¶</a></h5>
+<p>A file system iterates through directory entries and compares the component name to find the target file.
+Then, it passes the file’s vnode to the VFS if it finds the file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> Is it possible that a file exists in a file system, but there is no vnode object of it?</p>
+</div>
+<div class="section" id="create-a-file">
+<h5>Create a file<a class="headerlink" href="#create-a-file" title="本標題的永久連結">¶</a></h5>
+<p>If a file is not found in a file system, an error code should return to the VFS.
+Then, the VFS should check if O_CREAT is set in <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">flags</span></code>.
+If yes, it should ask the file system to create a new regular file and pass the created regular file’s vnode to the VFS.</p>
+</div>
+<div class="section" id="open-a-file">
+<h5>Open a file<a class="headerlink" href="#open-a-file" title="本標題的永久連結">¶</a></h5>
+<p>A file in a file system can be opened by more than one user at the same time.
+If a VFS successfully find a file in a pathname lookup, the VFS should create a file descriptor for the file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-1</span></code> implement <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">file*</span> <span class="pre">vfs_open(const</span> <span class="pre">char</span> <span class="pre">*pathname,</span> <span class="pre">int</span> <span class="pre">flags)</span></code></p>
+</div>
+</div>
+<div class="section" id="vfs-close">
+<h4>vfs_close<a class="headerlink" href="#vfs-close" title="本標題的永久連結">¶</a></h4>
+<p>Closing a file descriptor means a user no longer access the file by the file descriptor.
+The VFS should release the file descriptor back to the memory pool.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-2</span></code> implement <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">vfs_close(struct</span> <span class="pre">file*</span> <span class="pre">file)</span></code></p>
+</div>
+<div class="section" id="test-cases">
+<h4>Test cases<a class="headerlink" href="#test-cases" title="本標題的永久連結">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">a</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="n">O_CREAT</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">a</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="n">vfs_close</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">b</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="n">vfs_close</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="requirement-3">
+<h3>Requirement 3<a class="headerlink" href="#requirement-3" title="本標題的永久連結">¶</a></h3>
+<p>In this requirement, you need to implement the following functions for tmpfs.</p>
+<ul class="simple">
+<li><p>Write a regular file.</p></li>
+<li><p>Read a regular file.</p></li>
+</ul>
+<div class="section" id="vfs-write">
+<h4>vfs_write<a class="headerlink" href="#vfs-write" title="本標題的永久連結">¶</a></h4>
+<p>Given the file descriptor, a VFS calls the corresponding write method to write a file.</p>
+<p>tmpfs’s write starts from f_pos.
+The content is stored in memory.
+After the write finishes, tmpfs update f_pos and the size of the regular file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-1</span></code> Implement <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">vfs_write(struct</span> <span class="pre">file*</span> <span class="pre">file,</span> <span class="pre">const</span> <span class="pre">void*</span> <span class="pre">buf,</span> <span class="pre">size_t</span> <span class="pre">len)</span></code></p>
+</div>
+<div class="section" id="vfs-read">
+<h4>vfs_read<a class="headerlink" href="#vfs-read" title="本標題的永久連結">¶</a></h4>
+<p>Given the file descriptor, a VFS calls the corresponding read method to read a file.</p>
+<p>tmpfs’s read starts from f_pos.
+After the read finishes, tmpfs update f_pos.</p>
+<p>Note that f_pos should not exceed the file size.
+Once a file read reaches the end of file(EOF), it should stop there, and return the number of bytes read.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-2</span></code> Implement <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">vfs_read(struct</span> <span class="pre">file*</span> <span class="pre">file,</span> <span class="pre">void*</span> <span class="pre">buf,</span> <span class="pre">size_t</span> <span class="pre">len)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> Is EOF pass to the reader by a special character in the reader’s buffer?</p>
+</div>
+<div class="section" id="id1">
+<h4>Test cases<a class="headerlink" href="#id1" title="本標題的永久連結">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">a</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="n">O_CREAT</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">b</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">,</span> <span class="n">O_CREAT</span><span class="p">);</span>
+<span class="n">vfs_write</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s">&quot;Hello &quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+<span class="n">vfs_write</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="s">&quot;World!&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+<span class="n">vfs_close</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+<span class="n">vfs_close</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">sz</span><span class="p">;</span>
+<span class="n">sz</span> <span class="o">=</span> <span class="n">vfs_read</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="n">sz</span> <span class="o">+=</span> <span class="n">vfs_read</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">buf</span> <span class="o">+</span> <span class="n">sz</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="n">buf</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span> <span class="c1">// should be Hello World!</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="elective">
+<h2>Elective<a class="headerlink" href="#elective" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="read-directories">
+<h3>Read directories<a class="headerlink" href="#read-directories" title="本標題的永久連結">¶</a></h3>
+<p>A common UNIX command 『ls』 list all files under the directory.
+It can be implemented by retrieving directory entries information from a given directory.</p>
+<p>A VFS should devise a universal directory entry format for all file systems.
+When a user passes a buffer and a maximum read size to a VFS,
+the VFS should ask the underlying file system should follow the format to fill out the buffer.</p>
+<div class="section" id="id2">
+<h4>Test cases<a class="headerlink" href="#id2" title="本標題的永久連結">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// create some regular files at root directory</span>
+<span class="k">struct</span> <span class="n">file</span><span class="o">*</span> <span class="n">root</span> <span class="o">=</span> <span class="n">vfs_open</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="c1">// your read directory function</span>
+<span class="c1">// iterate all directory entries and print each file&#39;s name.</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Implement an API for users to get the directory entries information from a directory.</p>
+</div>
+</div>
+<div class="section" id="vfs-in-a-multitasking-scenario">
+<h3>VFS in a multitasking scenario<a class="headerlink" href="#vfs-in-a-multitasking-scenario" title="本標題的永久連結">¶</a></h3>
+<p>So far, we only consider how VFS works in a single thread environment.
+In a multitasking scenario, the address space is usually isolated between user tasks to a VFS.
+A user and a VFS can’t communicate with each other by simply pass the file descriptor object.
+Also, a user task should not be able to access another task’s file descriptor.</p>
+<p>Now, you need to implement a VFS in a multitasking scenario.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You need to extend the result from lab5.</p>
+</div>
+<div class="section" id="task-s-vfs-information">
+<h4>Task’s VFS information<a class="headerlink" href="#task-s-vfs-information" title="本標題的永久連結">¶</a></h4>
+<p>Each task may open different files and the current working directory may also be different.
+You need to keep that information in the <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">task</span></code> such that a VFS can serve each task differently.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">3</span></code> Should each task owns its current working directory and the root directory?</p>
+<div class="section" id="file-descriptor-table">
+<h5>File descriptor table<a class="headerlink" href="#file-descriptor-table" title="本標題的永久連結">¶</a></h5>
+<p>A VFS can’t directly pass a file descriptor object to a user task.
+The following conditions are required in a multitasking scenario to make a file accessible by a user task.</p>
+<ul class="simple">
+<li><p>For each opened file, a VFS should pass a token to the user task. The user task accesses the file by the token.</p></li>
+<li><p>A VFS should be able to identify the token belongs to which task.</p></li>
+<li><p>A user task should not be able to fake a token to read another task’s opened file.</p></li>
+</ul>
+<p>The easiest implementation to meet the requirements is a file descriptor table.</p>
+<p>Each task has a file descriptor table in its <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">task</span></code>.
+Each table entry stores a file descriptor.
+The token return to the user task is the index of a file descriptor in the file descriptor table.</p>
+<p>Then, VFS can easily identify the token belongs to which file descriptor by</p>
+<ol class="arabic simple">
+<li><p>Get the file descriptor table from the current task.</p></li>
+<li><p>Get the file descriptor by looking up the index token.</p></li>
+</ol>
+<p>Also, a user task can’t fake a token to access another task’s file descriptor because a token is its file descriptor table’s index.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2-1</span></code> Implement file descriptor table for tasks.</p>
+</div>
+</div>
+<div class="section" id="system-calls">
+<h4>System calls<a class="headerlink" href="#system-calls" title="本標題的永久連結">¶</a></h4>
+<p>You need to implement wrappers for the original vfs_open, vfs_read, etc. as a system calls to let user tasks access the VFS.
+The original file descriptor should be replaced with the file descriptor number.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2-2</span></code> Implement VFS system calls.</p>
+</div>
+<div class="section" id="id3">
+<h4>Test cases<a class="headerlink" href="#id3" title="本標題的永久連結">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="n">O_CREAT</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">,</span> <span class="n">O_CREAT</span><span class="p">);</span>
+<span class="n">write</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s">&quot;Hello &quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+<span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="s">&quot;World!&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+<span class="n">close</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+<span class="n">close</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;world&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">sz</span><span class="p">;</span>
+<span class="n">sz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="n">sz</span> <span class="o">+=</span> <span class="n">read</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">buf</span> <span class="o">+</span> <span class="n">sz</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="n">buf</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span> <span class="c1">// should be Hello World!</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="vfs-with-multiple-layers">
+<h3>VFS with multiple layers<a class="headerlink" href="#vfs-with-multiple-layers" title="本標題的永久連結">¶</a></h3>
+<p>In the required part, the VFS contains only one directory and files under it.
+Now, your VFS should be able to</p>
+<ul class="simple">
+<li><p>Create subdirectories.</p></li>
+<li><p>Change the current working directory.</p></li>
+<li><p>Mount file systems on directories.</p></li>
+<li><p>Look up an entire pathname.</p></li>
+</ul>
+<div class="section" id="mkdir">
+<h4>mkdir<a class="headerlink" href="#mkdir" title="本標題的永久連結">¶</a></h4>
+<p>Creating a directory is almost the same as creating a regular file.
+A VFS should find the parent directory of a newly created directory first.
+If the parent directory is found, call the file system’s mkdir method with the component name to create a new directory.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-1</span></code> Implement a VFS interface and a tmpfs method for <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">mkdir(const</span> <span class="pre">char*</span> <span class="pre">pathname)</span></code>.</p>
+</div>
+<div class="section" id="chdir">
+<h4>chdir<a class="headerlink" href="#chdir" title="本標題的永久連結">¶</a></h4>
+<p>With the layers of a VFS tree increased, it’s inefficient to specify a pathname starting from the root vnode.
+Hence besides the root vnode, a VFS should also keep the current working directory vnode.
+Then, a user can specify a pathname that the lookup starts at the current working directory vnode to shorten the lookup time.</p>
+<p>You need to implement an API for changing the current working directory given the pathname.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-2</span></code> Implement <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">chdir(const</span> <span class="pre">char*</span> <span class="pre">pathname)</span></code></p>
+</div>
+<div class="section" id="mount">
+<span id="id4"></span><h4>mount<a class="headerlink" href="#mount" title="本標題的永久連結">¶</a></h4>
+<p>A file system can mount on a directory.</p>
+<p>You should implement the following API to mount a file system.</p>
+<dl>
+<dt>int mount(const char* device, const char* mountpoint, const char* filesystem)</dt><dd><p>A VFS calls the file system’s method to mount on the mountpoint directory.</p>
+<p><strong>filesystem</strong> specify the file system’s name.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A VFS should find and call the file system’s method to set up the mount.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>device</strong> specify a name</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For a device-based file system, the name should be a pathname of a device file that stores a file system.</p></li>
+<li><p>For a memory-based file system, the name can be used as a name for the mounted file system.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>mountpoint</strong> specify directory’s pathname to be mounted on.</p>
+</dd>
+</dl>
+<p>You should implement the following API to unmount a file system.</p>
+<dl>
+<dt>int umount(const char* mountpoint)</dt><dd><p>A VFS tear down the mounted file system on the mountpoint directory.</p>
+<p><strong>mountpoint</strong> specify the directory’s pathname with a file system mounted on.</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-3</span></code> Implement VFS interfaces and tmpfs methods for <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">mount(const</span> <span class="pre">char*</span> <span class="pre">device,</span> <span class="pre">const</span> <span class="pre">char*</span> <span class="pre">mountpoint,</span> <span class="pre">const</span> <span class="pre">char*</span> <span class="pre">filesystem)</span></code> and <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">umount(const</span> <span class="pre">char*</span> <span class="pre">mountpoint)</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You don’t need to implement mounting and unmounting the root directory.</p>
+</div>
+</div>
+<div class="section" id="pathname-lookup">
+<h4>Pathname lookup<a class="headerlink" href="#pathname-lookup" title="本標題的永久連結">¶</a></h4>
+<p>As mentioned in the background section, a pathname lookup is simply traversing the vnode.
+A VFS can use the following step to find the target file.</p>
+<ol class="arabic simple">
+<li><p>Start from one vnode.</p></li>
+<li><p>Get the next component name.</p></li>
+<li><p>Get the next vnode by the next component name.</p></li>
+<li><p>Go to the next vnode.</p></li>
+</ol>
+<p>Repeat 2-4; a VFS can reach the target file’s vnode if the file exists.</p>
+<div class="section" id="absolute-vs-relative-pathname">
+<h5>Absolute vs. relative pathname<a class="headerlink" href="#absolute-vs-relative-pathname" title="本標題的永久連結">¶</a></h5>
+<p>A pathname starts with 『/』 is an absolute pathname.
+The lookup starts at the root directory vnode.</p>
+<p>Otherwise, it’s a relative pathname.
+The lookup starts at the current working directory vnode.</p>
+</div>
+<div class="section" id="id5">
+<h5>Component name lookup<a class="headerlink" href="#id5" title="本標題的永久連結">¶</a></h5>
+<p>Each component name is delimited by 『/』.
+The VFS looks up the component name in a directory vnode.</p>
+</div>
+<div class="section" id="the-last-component-name">
+<h5>The last component name<a class="headerlink" href="#the-last-component-name" title="本標題的永久連結">¶</a></h5>
+<p>The last component name is special because a new regular file or directory may be created by the last component name.</p>
+</div>
+<div class="section" id="dot-component-name">
+<h5>Dot component name<a class="headerlink" href="#dot-component-name" title="本標題的永久連結">¶</a></h5>
+<p><strong>「.」</strong> and <strong>「..」</strong> are special component names.</p>
+<p><strong>「.」</strong> refers to the current directory.</p>
+<p><strong>「..」</strong> refers to the parent directory.</p>
+</div>
+<div class="section" id="cross-the-mountpoint">
+<h5>Cross the mountpoint<a class="headerlink" href="#cross-the-mountpoint" title="本標題的永久連結">¶</a></h5>
+<p>A pathname lookup crosses a mountpoint in the following case.</p>
+<ul class="simple">
+<li><p>The current directory is the root of a file system, and the next component name is 「..」.</p></li>
+<li><p>The next component name is a mountpoint.</p></li>
+</ul>
+<p>In the first case, if the current directory is also the root of the VFS, the VFS can just stay at the root directory vnode.
+Otherwise, the file system is mounted on another file system’s mountpoint.
+The VFS should go to the parent directory vnode of the mountpoint.</p>
+<p>In the second case, the VFS should go to the mounted file system’s root directory vnode instead of the mountpoint’s vnode.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-4</span></code> Implement pathname lookup.</p>
+</div>
+</div>
+<div class="section" id="id6">
+<h4>Test cases<a class="headerlink" href="#id6" title="本標題的永久連結">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="n">mkdir</span><span class="p">(</span><span class="s">&quot;mnt&quot;</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/mnt/a.txt&quot;</span><span class="p">,</span> <span class="n">O_CREAT</span><span class="p">);</span>
+<span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s">&quot;Hi&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+<span class="n">chdir</span><span class="p">(</span><span class="s">&quot;mnt&quot;</span><span class="p">);</span>
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;./a.txt&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">fd</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s">&quot;Hi&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="n">chdir</span><span class="p">(</span><span class="s">&quot;..&quot;</span><span class="p">);</span>
+<span class="n">mount</span><span class="p">(</span><span class="s">&quot;tmpfs&quot;</span><span class="p">,</span> <span class="s">&quot;mnt&quot;</span><span class="p">,</span> <span class="s">&quot;tmpfs&quot;</span><span class="p">);</span>
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;mnt/a.txt&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="n">umount</span><span class="p">(</span><span class="s">&quot;/mnt&quot;</span><span class="p">);</span>
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/mnt/a.txt&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">fd</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s">&quot;Hi&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="procfs">
+<h3>procfs<a class="headerlink" href="#procfs" title="本標題的永久連結">¶</a></h3>
+<p>Some kernel’s internal states can be exposed to users.
+It enables a user to get or change the kernel’s internal states.</p>
+<p>One way for a user to access one specific kernel resource is an ad-hoc system call.
+However, it’s inconvenient for a user to write different codes to access different resources.</p>
+<p>Another solution is a general interface for all accessible internal states.
+A kernel can abstract its internal states as files and exposed them by a VFS.</p>
+<p>procfs is a file system in UNIX-like OS to expose processes and system state.
+You need to implement it to enable a user task to access a kernel’s internal states.</p>
+<div class="section" id="read-and-write-internal-state">
+<h4>Read and write internal state<a class="headerlink" href="#read-and-write-internal-state" title="本標題的永久連結">¶</a></h4>
+<p>In procfs, a kernel’s internal state is retrieved/modified by reading/writing the corresponding file.
+Here, you can play with the concept by creating <strong>switch</strong> and <strong>hello</strong> files.</p>
+<p>Reading <strong>hello</strong> always gets the string 「hello」.</p>
+<p>The content of <strong>switch</strong> can change the letter case of <strong>hello</strong>.</p>
+<ul class="simple">
+<li><p>Writing 「0」 to <strong>switch</strong>, the content of <strong>hello</strong> becomes 「hello」.</p></li>
+<li><p>Writing 「1」 to <strong>switch</strong>, the content of <strong>hello</strong> becomes 「HELLO」.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4-1</span></code> The procfs creates <strong>switch</strong> and <strong>hello</strong> file in its root directory. Users can access them by open, read, and write.</p>
+</div>
+<div class="section" id="get-tasks-internal-states">
+<h4>Get tasks』 internal states<a class="headerlink" href="#get-tasks-internal-states" title="本標題的永久連結">¶</a></h4>
+<p>For accessing task-related states, procfs can create task directories named by task id and then create regular files under it as in <code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4-1</span></code>.
+However, it’s not a good solution to create every task-related states in the beginning because the state and even the existence of that task always update.</p>
+<p>A better implementation is, the creation and deletion of a task directory are defered until someone access task-related information in procfs.</p>
+<p>Then, procfs will</p>
+<ol class="arabic simple">
+<li><p>Get the information from the task subsystem.</p></li>
+<li><p>Create/delete task id directory in procfs.</p></li>
+<li><p>Create/update task status file under the task id directory.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4-2</span></code> The procfs lazily updates the task-related directory and file. Users can read task’s status by reading <code class="docutils literal notranslate"><span class="pre">&lt;task</span> <span class="pre">id&gt;/status</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>The procfs should still follow the VFS interface, but the lookup/read/write methods could be specialized for different objects.</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h4>Test cases<a class="headerlink" href="#id7" title="本標題的永久連結">¶</a></h4>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
+<span class="n">mkdir</span><span class="p">(</span><span class="s">&quot;proc&quot;</span><span class="p">);</span>
+<span class="n">mount</span><span class="p">(</span><span class="s">&quot;procfs&quot;</span><span class="p">,</span> <span class="s">&quot;proc&quot;</span><span class="p">,</span> <span class="s">&quot;procfs&quot;</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/proc/switch&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s">&quot;0&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/proc/hello&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+<span class="n">buf</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span> <span class="c1">// should be hello</span>
+<span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/proc/switch&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s">&quot;1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/proc/hello&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">sz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+<span class="n">buf</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span> <span class="c1">//should be HELLO</span>
+<span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/proc/1/status&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// choose a created task&#39;s id here</span>
+<span class="n">sz</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+<span class="n">buf</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span> <span class="c1">// status of the task.</span>
+<span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+<span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&quot;/proc/999/status&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// choose a non-existed task&#39;s id here</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="initramfs">
+<h3>initramfs<a class="headerlink" href="#initramfs" title="本標題的永久連結">¶</a></h3>
+<p>Initial ramdisk is a file system image file.
+A kernel can populate its root file system with an initial ramdisk during the booting process.
+Then, it can execute the executable file inside the file system and initialize the system in user mode.</p>
+<p>An initial ramdisk can be implemented as an archive file.
+It’ll be loaded into memory before the kernel startup.
+After the VFS and the root file system are ready, the kernel parses the archive and populates the root file system by it.</p>
+<div class="section" id="cpio-archive">
+<h4>cpio archive<a class="headerlink" href="#cpio-archive" title="本標題的永久連結">¶</a></h4>
+<p>cpio is a simple archive format.
+Each file will be recorded as a header followed by the pathname and the file data.
+The header record every information used in UNIX VFS.
+In this lab, you only need to focus on</p>
+<ul class="simple">
+<li><p><strong>c_mode:</strong> to identify regular file and directory</p></li>
+<li><p><strong>c_filesize:</strong> the size of the file data.</p></li>
+<li><p><strong>c_namesize:</strong> the size of the file’s pathname.</p></li>
+</ul>
+<p>It’s recommended to use the new ascii format to create the cpio archive file.
+You can use the following command to create it.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd &lt;target_directory&gt;
+find . | cpio -o -H newc &gt; initramfs.cpio
+</pre></div>
+</div>
+<p>The first record will be the 「.」 directory.
+cpio also creates the last record with the pathname 「TRAILER!!!」 to indicate it’s the end of the archive file.
+You can omit these two records.
+Then, <code class="docutils literal notranslate"><span class="pre">mkdir</span></code> and <code class="docutils literal notranslate"><span class="pre">open(pathname,</span> <span class="pre">O_CREAT)</span></code> to create each file and directory.</p>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>The format of cpio header can be looked up by <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">5</span> <span class="pre">cpio</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>The cpio archive pads 0 to make both the size of the header + pathname and the size of file data to be multiple of 4.</p>
+</div>
+</div>
+<div class="section" id="load-initial-ramdisk">
+<h4>Load initial ramdisk<a class="headerlink" href="#load-initial-ramdisk" title="本標題的永久連結">¶</a></h4>
+<p>There are two ways to load an initial ramdisk.
+The first one is embedding it into a kernel as in <a class="reference internal" href="lab5.html#embed"><span class="std std-ref">Embed compiled binary to kernel</span></a>.
+The second one is letting a bootloader load it to a particular memory address.</p>
+<p>It’s recommended to use the second one because you may get a huge kernel image for embedding a large ramdisk into it.
+Then, the UART bootloader would take a long time to load it.
+With the second method, a ramdisk can be put into an SD card with a kernel image.
+The rpi3’s bootloader can load it for you.</p>
+<div class="section" id="qemu">
+<h5>QEMU<a class="headerlink" href="#qemu" title="本標題的永久連結">¶</a></h5>
+<p>QEMU also provides a way to load an initial ramdisk.
+You can add the argument <code class="docutils literal notranslate"><span class="pre">-initrd</span> <span class="pre">&lt;cpio</span> <span class="pre">archive&gt;</span></code> to QEMU and QEMU will load the cpio archive file to 0x8000000.</p>
+</div>
+<div class="section" id="rpi3">
+<h5>rpi3<a class="headerlink" href="#rpi3" title="本標題的永久連結">¶</a></h5>
+<p>You can put the cpio archive to  the boot partition of the SD card.
+And create a <code class="docutils literal notranslate"><span class="pre">config.txt</span></code> file under the same directory with the following content.
+The rpi3 bootloader will put the archive file to the target address.</p>
+<p><strong>config.txt</strong></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ramfsfile=&lt;cpio archive&gt;
+ramfsaddr=&lt;loaded physical address&gt;
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">5</span></code> Implement initramfs to populate the root file system.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="lab8.html" class="btn btn-neutral float-right" title="Lab 8 : File System Meets Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lab6.html" class="btn btn-neutral float-left" title="Lab 6 : Allocator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

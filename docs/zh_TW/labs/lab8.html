@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-TW" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-TW" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lab 8 : File System Meets Hardware &mdash; nctuos 0.0 說明文件</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/translations.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜尋" href="../search.html" />
+    <link rel="next" title="The Assembly You Need" href="../hardware/asm.html" />
+    <link rel="prev" title="Lab 7 : Virtual File System" href="lab7.html" />
+ 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-167313793-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-167313793-1');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> nctuos
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Labs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="lab0.html">Lab 0: Environment Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab1.html">Lab 1 : Hello World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab2.html">Lab 2 : Bootloader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab3.html">Lab 3 : Exception and Interrupt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab4.html">Lab 4 : Multitasking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab5.html">Lab 5 : Virtual memory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6 : Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab7.html">Lab 7 : Virtual File System</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 8 : File System Meets Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals-of-this-lab">Goals of this lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sd-card">SD card</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sd-card-driver">SD card driver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sd-card-on-qemu">SD card on QEMU</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sector-vs-block-vs-cluster">Sector vs. Block vs. Cluster</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sector">Sector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#block">Block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster">Cluster</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#fat-file-system">FAT file system</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#short-filenames-sfn-vs-long-filenames-lfn">Short filenames(SFN) vs. Long filenames(LFN)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#details-of-fat">Details of FAT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#required">Required</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-1">Requirement 1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#get-the-fat32-partition">Get the FAT32 partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-up-a-fat32-mount">Set up a FAT32 mount</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#requirement-2">Requirement 2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lookup-and-open-a-file-in-fat32">Lookup and open a file in FAT32</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#read-write-a-file-in-fat32">Read/Write a file in FAT32</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#elective">Elective</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-file-in-fat32">Create a file in FAT32</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fat32-with-lfn">FAT32 with LFN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#device-file">Device file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#device-file-registration">Device file registration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mknod">mknod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sdcard">sdcard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#console">console</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-as-a-cache-for-external-storage">Memory as a cache for external storage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#file-s-metadata">File’s metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-s-name">File’s name</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-s-content">File’s content</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sync">sync</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/asm.html">The Assembly You Need</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/uart.html">UART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/mailbox.html">Mailbox</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../external_reference/index.html">Exteral Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nctuos</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Lab 8 : File System Meets Hardware</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/labs/lab8.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lab-8-file-system-meets-hardware">
+<h1>Lab 8 : File System Meets Hardware<a class="headerlink" href="#lab-8-file-system-meets-hardware" title="本標題的永久連結">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="本標題的永久連結">¶</a></h2>
+<p>In the previous lab, the file system operations are only related to memory.
+In this lab, you’ll learn how a file system interacts with real devices.</p>
+</div>
+<div class="section" id="goals-of-this-lab">
+<h2>Goals of this lab<a class="headerlink" href="#goals-of-this-lab" title="本標題的永久連結">¶</a></h2>
+<ul class="simple">
+<li><p>Understand how to read/write data from an SD card.</p></li>
+<li><p>Implement a FAT32 file system.</p></li>
+<li><p>Understand how to access devices by VFS.</p></li>
+<li><p>Understand how memory be used as a cache for slow external storage mediums.</p></li>
+</ul>
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="sd-card">
+<h3>SD card<a class="headerlink" href="#sd-card" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="sd-card-driver">
+<h4>SD card driver<a class="headerlink" href="#sd-card-driver" title="本標題的永久連結">¶</a></h4>
+<p>We provide an <a class="reference external" href="https://github.com/GrassLab/osdi/raw/master/supplement/sdhost.c">SD controller driver</a>
+for you.</p>
+<p>You should first call the <code class="docutils literal notranslate"><span class="pre">sd_init()</span></code> to set up GPIO, SD host, and initialize the SD card.
+Then you can call the following APIs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">readblock(int</span> <span class="pre">block_id,</span> <span class="pre">char</span> <span class="pre">buf[512])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">writeblock(int</span> <span class="pre">block_id,</span> <span class="pre">char</span> <span class="pre">buf[512])</span></code></p>
+<p>It reads/writes 512 bytes from/to the SD card to/from buf[512].</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You need to modify the MMIO base according to your kernel mapping.
+You can also modify the code to meet your requirements.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>The driver code is possibly wrong.
+Also, it’s only tested on QEMU and the rpi3 with the SD card we gave to you.
+Please report it if you encounter a problem, you can also get a bonus if you find the bug in the code.</p>
+</div>
+</div>
+<div class="section" id="sd-card-on-qemu">
+<h4>SD card on QEMU<a class="headerlink" href="#sd-card-on-qemu" title="本標題的永久連結">¶</a></h4>
+<p>It’s always easier to test your code on QEMU first.</p>
+<p>You can add the argument <code class="docutils literal notranslate"><span class="pre">-drive</span> <span class="pre">if=sd,file=&lt;img</span> <span class="pre">name&gt;,format=raw</span></code> to attach an SD card file to QEMU.</p>
+</div>
+</div>
+<div class="section" id="sector-vs-block-vs-cluster">
+<h3>Sector vs. Block vs. Cluster<a class="headerlink" href="#sector-vs-block-vs-cluster" title="本標題的永久連結">¶</a></h3>
+<p>These terms appear in the documentation a lot,
+you should be able to distinguish them.</p>
+<div class="section" id="sector">
+<h4>Sector<a class="headerlink" href="#sector" title="本標題的永久連結">¶</a></h4>
+<p>A sector is the smallest unit for a hard drive to manage its data.</p>
+<p>The size is usually 512 bytes.</p>
+</div>
+<div class="section" id="block">
+<h4>Block<a class="headerlink" href="#block" title="本標題的永久連結">¶</a></h4>
+<p>A block is the smallest unit for a block device driver to read/write a device.
+It’s sometimes interchangeable with a sector.</p>
+<p>The provided SD card driver code use 512 byte as the block size.</p>
+</div>
+<div class="section" id="cluster">
+<h4>Cluster<a class="headerlink" href="#cluster" title="本標題的永久連結">¶</a></h4>
+<p>A cluster is composed of contiguous blocks.
+A file system uses it as a basic unit to store a regular file or a directory.</p>
+</div>
+</div>
+<div class="section" id="fat-file-system">
+<h3>FAT file system<a class="headerlink" href="#fat-file-system" title="本標題的永久連結">¶</a></h3>
+<p>FAT is a simple and widely used file system.
+There is at least one file allocation table(FAT) whose entry stores the allocation status.
+The entry’s size can be varied from 12 bit(FAT12), 16 bit(FAT16), and 32 bit(FAT32).</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You only need to implement FAT32 in this lab.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>FAT is a portable file system and used in Windows, Linux, and some RTOS.
+Hence, your FAT driver should be able to read a file written by another operating system(e.g. Linux).
+Also, another operating system should be able to read a file written by your FAT driver.</p>
+</div>
+<div class="section" id="short-filenames-sfn-vs-long-filenames-lfn">
+<h4>Short filenames(SFN) vs. Long filenames(LFN)<a class="headerlink" href="#short-filenames-sfn-vs-long-filenames-lfn" title="本標題的永久連結">¶</a></h4>
+<p>Originally, FAT uses 8 bytes to stores a file’s name and 3 bytes to store the file’s extension name.
+For example, if the file’s entire name is a.out, 「a」 will be stored in the 8-byte filename, 「out」 will be stored in the 3-byte extension name and 「.」 is not stored.</p>
+<p>However, it limits the filename’s size, and it’s impossible to store a filename with special characters.
+Hence, LFN is invented.
+It stores the filename in unicode and can stack multiple directory entries to support varied size filename.</p>
+<p>SFN is easier than LFN, so you only need to support SFN in the required part.
+The nctuos.img we provided in lab0 stores the filename in LFN.
+We provide a new SFN <a class="reference external" href="https://github.com/GrassLab/osdi/raw/master/supplement/sfn_nctuos.img">sfn_nctuos.img</a></p>
+<p>There is also a kernel8.img inside.
+The kernel8.img prints the first block and the first partition block of the SD card.
+You can replace the kernel8.img with yours later on.</p>
+<img alt="../_images/lab8_0.png" src="../_images/lab8_0.png" />
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>In Linux, you can specify how to mount a FAT file system.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">-t</span> <span class="pre">msdos</span> <span class="pre">&lt;device&gt;</span> <span class="pre">&lt;dir&gt;</span></code>: linux store and load filename by SFN.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">-t</span> <span class="pre">vfat</span> <span class="pre">&lt;device&gt;</span> <span class="pre">&lt;dir&gt;</span></code>: linux store and load filename by LFN.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>In Linux, you can set up a loop device for a file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">losetup</span> <span class="pre">-fP</span> <span class="pre">sfn_nctuos.img</span></code>: set up a loop device for sfn_nctuos.img.</p>
+<p><code class="docutils literal notranslate"><span class="pre">losetup</span> <span class="pre">-d</span> <span class="pre">&lt;loop</span> <span class="pre">device&gt;</span></code>: detach the loop device from the sfn_nctuos.img.</p>
+<p>Then, you can update the SD image to test your code on QEMU first.</p>
+</div>
+</div>
+<div class="section" id="details-of-fat">
+<h4>Details of FAT<a class="headerlink" href="#details-of-fat" title="本標題的永久連結">¶</a></h4>
+<p>In this lab, you need to understand the format of FAT to be able to find, read, and write files in FAT.
+The details are not covered by this documentation.
+Please refer to <a class="reference external" href="https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system">https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system</a>
+You can find everything about FAT there.</p>
+</div>
+</div>
+</div>
+<div class="section" id="required">
+<h2>Required<a class="headerlink" href="#required" title="本標題的永久連結">¶</a></h2>
+<p>In the required part, you should be able to read and write existing files under the root directory of a FAT32 file system.</p>
+<p>You can create a new text file on your host computer first.
+Then read/write the file on your rpi3.</p>
+<p>The size of a FAT32 cluster is usually larger than the block size, but you can assume that the directory and the regular file you read/write is on the first block of the cluster.</p>
+<div class="section" id="requirement-1">
+<h3>Requirement 1<a class="headerlink" href="#requirement-1" title="本標題的永久連結">¶</a></h3>
+<p>In this requirement, you need to mount the FAT32 file system in the SD card.
+You could set the FAT32 file system as the root file system if you didn’t implement <a class="reference internal" href="lab7.html#mount"><span class="std std-ref">mount</span></a> in lab7.</p>
+<div class="section" id="get-the-fat32-partition">
+<h4>Get the FAT32 partition<a class="headerlink" href="#get-the-fat32-partition" title="本標題的永久連結">¶</a></h4>
+<p>You should know the location of the FAT32 file system in the SD card first before mounting it.</p>
+<p>The SD card should already be formatted by MBR.
+You can parse it to get each partition’s type, size, and block index.</p>
+<div class="admonition hint">
+<p class="admonition-title">提示</p>
+<p>If you use the provided sfn_nctuos.img, the FAT32 partition’s block index is 2048.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-1</span></code> Get the FAT32 partition.</p>
+</div>
+<div class="section" id="set-up-a-fat32-mount">
+<h4>Set up a FAT32 mount<a class="headerlink" href="#set-up-a-fat32-mount" title="本標題的永久連結">¶</a></h4>
+<p>A FAT32 file system stores its metadata in the first sector of the partition.</p>
+<p>You need to do the following things during mounting.</p>
+<ol class="arabic simple">
+<li><p>Parse the metadata on the SD card.</p></li>
+<li><p>Create a kernel object to store the metadata in memory.</p></li>
+<li><p>Get the root directory cluster number and create a FAT32’s root directory object.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">1-2</span></code> Parse the FAT32’s metadata and set up the mount.</p>
+</div>
+</div>
+<div class="section" id="requirement-2">
+<h3>Requirement 2<a class="headerlink" href="#requirement-2" title="本標題的永久連結">¶</a></h3>
+<div class="section" id="lookup-and-open-a-file-in-fat32">
+<h4>Lookup and open a file in FAT32<a class="headerlink" href="#lookup-and-open-a-file-in-fat32" title="本標題的永久連結">¶</a></h4>
+<p>To look up a file in a FAT32 directory,</p>
+<ol class="arabic simple">
+<li><p>Get the cluster of the directory and calculate its block index.</p></li>
+<li><p>Read the first block of the cluster by the <code class="docutils literal notranslate"><span class="pre">readblock()</span></code></p></li>
+<li><p>Traverse the directory entries and compare the component name with filename + extension name to find the file.</p></li>
+<li><p>You can get the first cluster of the file in the directory entry.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-1</span></code> Look up and open a file in FAT32.</p>
+</div>
+<div class="section" id="read-write-a-file-in-fat32">
+<h4>Read/Write a file in FAT32<a class="headerlink" href="#read-write-a-file-in-fat32" title="本標題的永久連結">¶</a></h4>
+<p>After you get the first cluster of the file, you can use <code class="docutils literal notranslate"><span class="pre">readblock()</span></code>/<code class="docutils literal notranslate"><span class="pre">writeblock()</span></code> to read/write the file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-2</span></code> Read/Write a file in FAT32.</p>
+<div class="admonition note">
+<p class="admonition-title">備註</p>
+<p>You need to update the file’s size in the FAT32’s directly entry if the file’s size is changed by a file write.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="elective">
+<h2>Elective<a class="headerlink" href="#elective" title="本標題的永久連結">¶</a></h2>
+<div class="section" id="create-a-file-in-fat32">
+<h3>Create a file in FAT32<a class="headerlink" href="#create-a-file-in-fat32" title="本標題的永久連結">¶</a></h3>
+<p>To create a new file in FAT32,</p>
+<ol class="arabic simple">
+<li><p>Find an empty entry in the FAT table.</p></li>
+<li><p>Find an empty directory entry in the target directory.</p></li>
+<li><p>Set them to proper values.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">1</span></code> Create a file in FAT32.</p>
+</div>
+<div class="section" id="fat32-with-lfn">
+<h3>FAT32 with LFN<a class="headerlink" href="#fat32-with-lfn" title="本標題的永久連結">¶</a></h3>
+<p>In the required part, the FAT32 filename is only supported for SFN.</p>
+<p>In this part, please modify your code to support LFN.</p>
+<p>Note that, the directory entry of LFN is stored in UCS-2.
+You need to translate the format if your terminal use UTF8 or other formats to print the result to your screen.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">2</span></code> Implement a FAT32 with LFN support. You should create/lookup a file with special characters(e.g. Chinese) in its name.</p>
+</div>
+<div class="section" id="device-file">
+<h3>Device file<a class="headerlink" href="#device-file" title="本標題的永久連結">¶</a></h3>
+<p>A vnode of a VFS tree can also represent a device, and we call it a device file.
+To support a device file in a VFS, you need</p>
+<ul class="simple">
+<li><p>a VFS API to create a device file’s vnode,</p></li>
+<li><p>a mechanism that each device can register itself to a VFS.</p></li>
+</ul>
+<div class="section" id="device-file-registration">
+<h4>Device file registration<a class="headerlink" href="#device-file-registration" title="本標題的永久連結">¶</a></h4>
+<p>A device can register itself to a VFS in its setup.
+The VFS assigns the device a unique device id.
+Then the device can be recognized by a VFS.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-1</span></code> Implement a mechanism that each device can register itself to a VFS.</p>
+</div>
+<div class="section" id="mknod">
+<h4>mknod<a class="headerlink" href="#mknod" title="本標題的永久連結">¶</a></h4>
+<p>A user can use the device id to create a vnode in a file system.
+A file system uses the device id to find the device driver and assign the created vnode’s file operations to the corresponding methods.</p>
+<p>Finally, a user can read/write a device file by the methods provided by a device driver.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-2</span></code> Implement a VFS interface and a tmpfs method for <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">mknod(const</span> <span class="pre">char*</span> <span class="pre">pathname,</span> <span class="pre">int</span> <span class="pre">dev_id)</span></code></p>
+</div>
+<div class="section" id="sdcard">
+<h4>sdcard<a class="headerlink" href="#sdcard" title="本標題的永久連結">¶</a></h4>
+<p>During the SD card driver’s initialization,
+the driver registers the SD card and all the partitions of the SD card to a VFS.</p>
+<p>Then, a user can create device files for the SD card and its partitions by <code class="docutils literal notranslate"><span class="pre">mknod()</span></code>.</p>
+<p>After that, a user can open, read, and write the SD card by the device file.
+A VFS will call the corresponding method and finally call the SD card driver’s <code class="docutils literal notranslate"><span class="pre">readblock()</span></code> or <code class="docutils literal notranslate"><span class="pre">writeblock()</span></code> to read or write the SD card.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-3</span></code> Create a sdcard device file. A user can read or write an SD card by reading or writing its device file.</p>
+</div>
+<div class="section" id="console">
+<h4>console<a class="headerlink" href="#console" title="本標題的永久連結">¶</a></h4>
+<p>The console of the operating system can also be implemented by a device file.
+You can use your existing UART code and register it to a VFS.</p>
+<p>After a UART vnode is created and is opened,
+a file read or write will call the UART driver’s read or write functions to get/print characters from/to the console.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">3-4</span></code> Create a UART device file as the console, A user can get/print characters from/to console by reading or writing its device file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">1</span></code> Explain how an OS supports automatically mounting file systems after plug in a USB flash drive into a computer.</p>
+</div>
+</div>
+<div class="section" id="memory-as-a-cache-for-external-storage">
+<h3>Memory as a cache for external storage<a class="headerlink" href="#memory-as-a-cache-for-external-storage" title="本標題的永久連結">¶</a></h3>
+<p>Accessing an SD card is much slower than accessing memory.
+Before a CPU shutdown or an SD card ejected, it not necessary to synchronize the data between memory and SD card.
+Hence, it’s more efficient to preserve the data in memory and use memory as a cache for external storage.</p>
+<p>We can categorize the file’s data on the storage into three types: file’s content, file’s name, and file’s metadata.</p>
+<div class="section" id="file-s-metadata">
+<h4>File’s metadata<a class="headerlink" href="#file-s-metadata" title="本標題的永久連結">¶</a></h4>
+<p>Besides the content of a file, additional information such as file size is stored in external storage, too.
+The additional information is the file’s metadata.
+There is also metadata for a file system such as FAT tables in FAT.</p>
+<p>Those metadata are cached by a file system’s kernel objects.
+You should have already implemented it.</p>
+</div>
+<div class="section" id="file-s-name">
+<h4>File’s name<a class="headerlink" href="#file-s-name" title="本標題的永久連結">¶</a></h4>
+<p>A pathname lookup for a file system on external storage involves,</p>
+<ol class="arabic simple">
+<li><p>Read the directory block from the external storage.</p></li>
+<li><p>Parse the directory entry and compare the directory entry’s filename with the component name.</p></li>
+<li><p>Get the next directory location.</p></li>
+</ol>
+<p>A VFS can reduce the time spend on reading directory block and parsing directory entry by a component name cache mechanism.
+A component name cache mechanism can be implemented as:</p>
+<ol class="arabic simple">
+<li><p>Look up the component name cache of the directory first.</p></li>
+<li><p>If successfully finds the vnode, return to the vnode. Otherwise, call the lookup method of the underlying file system.</p></li>
+<li><p>The underlying file system looks up from external storage.</p></li>
+<li><p>If it successfully finds the file, it creates a vnode for the file and put it into the component name cache.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4-1</span></code> Implement a component name cache mechanism for faster pathname lookup.</p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">2</span></code> How to implement a component cache mechanism if a file has multiple names (because of hard links)</p>
+</div>
+<div class="section" id="file-s-content">
+<h4>File’s content<a class="headerlink" href="#file-s-content" title="本標題的永久連結">¶</a></h4>
+<p>A VFS can cache a file’s content in memory by page frames.
+A page cache mechanism can be implemented as:</p>
+<ol class="arabic simple">
+<li><p>Check the existence of the file’s page frames when read or write a file.</p></li>
+<li><p>If the page frames don’t exist, allocate page frames for the file.</p></li>
+<li><p>The underlying file system populates the page frames with the file’s content in external storage if necessary.</p></li>
+<li><p>Read or write the page frames of the file.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4-2</span></code> Implement a page cache mechanism for faster file read and write.</p>
+</div>
+<div class="section" id="sync">
+<h4>sync<a class="headerlink" href="#sync" title="本標題的永久連結">¶</a></h4>
+<p>A VFS should synchronize the file’s memory cache with the external storage when a user wants to eject it.
+Hence, a VFS should provide an API for users to synchronize the data, and the file system should implement the synchronize method for writing data back to the external storage.</p>
+<p><code class="docutils literal notranslate"><span class="pre">elective</span> <span class="pre">4-3</span></code> Implement a VFS interface and a FAT32 method for <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">sync()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">3</span></code> Does tmpfs need sync method?</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hardware/asm.html" class="btn btn-neutral float-right" title="The Assembly You Need" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lab7.html" class="btn btn-neutral float-left" title="Lab 7 : Virtual File System" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Jim
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

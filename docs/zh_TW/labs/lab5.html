@@ -172,6 +172,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="lab6.html">Lab 6 : Allocator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab7.html">Lab 7 : Virtual File System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lab8.html">Lab 8 : File System Meets Hardware</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Hardware</span></p>
 <ul>
@@ -567,7 +569,7 @@ Page frames are valuable resource and can be used for different purposes such as
 </ul>
 <p>Same as <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">task</span></code> , you need to design your own <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">page</span></code>.
 Each <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">page</span></code> refer to one page frame.
-Your kernel bookkeeps the the use of the page frame in <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">page</span></code>.</p>
+Your kernel bookkeeps the use of the page frame in <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">page</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">2-1</span></code> Implement page bookkeeping.</p>
 <div class="admonition note">
 <p class="admonition-title">備註</p>
@@ -653,7 +655,7 @@ It provides the <strong>entry point</strong>, <strong>call exit</strong> after r
 <p>The user library also need to provide <strong>common functions</strong> such as print, memory copy.
 These functions may rely on system calls, user library should wrap it and hide the details for programmers.
 Programmers only need to write the main function and link to the library for other utilities.</p>
-<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-1</span></code> Implement a minimum user library.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-2</span></code> Implement a minimum user library.</p>
 </div>
 <div class="section" id="implement-shell-as-an-user-program">
 <h5>Implement shell as an user program<a class="headerlink" href="#implement-shell-as-an-user-program" title="本標題的永久連結">¶</a></h5>
@@ -664,10 +666,10 @@ When you need 0 initialized global/static variables, you should explicitly 0 ini
 Then, the variables will be put into .data and be preserved after objcopy.</p>
 <p>The following picture shows how to create 0 initialized data to .data.</p>
 <img alt="../_images/lab5_3.png" src="../_images/lab5_3.png" />
-<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-2</span></code> Implement shell as an user program and use <strong>objcopy</strong> to turn the ELF file into a raw binary.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-3</span></code> Implement shell as an user program and use <strong>objcopy</strong> to turn the ELF file into a raw binary.</p>
 </div>
 <div class="section" id="embed-compiled-binary-to-kernel">
-<h5>Embed compiled binary to kernel<a class="headerlink" href="#embed-compiled-binary-to-kernel" title="本標題的永久連結">¶</a></h5>
+<span id="embed"></span><h5>Embed compiled binary to kernel<a class="headerlink" href="#embed-compiled-binary-to-kernel" title="本標題的永久連結">¶</a></h5>
 <p>Two approaches are provided for you to embed binaries into your kernel.
 Both makes encapsulate the binary as an object file, and you can link it to kernel and get them by symbol’s virtual address.</p>
 <p><strong>By ld</strong></p>
@@ -686,7 +688,7 @@ Both makes encapsulate the binary as an object file, and you can link it to kern
 </pre></div>
 </div>
 <img alt="../_images/lab5_2.png" src="../_images/lab5_2.png" />
-<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-3</span></code> Embed your shell binary to kernel image.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-4</span></code> Embed your shell binary to kernel image.</p>
 </div>
 <div class="section" id="raw-binary-loading-and-mapping">
 <h5>Raw binary loading and mapping<a class="headerlink" href="#raw-binary-loading-and-mapping" title="本標題的永久連結">¶</a></h5>
@@ -722,7 +724,7 @@ Therefore, each user task can use the same virtual address to their own user sta
 </ul>
 </li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-4</span></code> Allocate one page frame for user stack and map user task’s stack to the common address.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-5</span></code> Allocate one page frame for user stack and map user task’s stack to the common address.</p>
 <div class="admonition note">
 <p class="admonition-title">備註</p>
 <p>Currently, kernel stacks are still statically declared and allocated.
@@ -744,7 +746,7 @@ Also, a TLB invalidation is need because the old values are staled.</p>
 <span class="n">isb</span> <span class="c1">// clear pipeline</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-4</span></code> Set TTBR0_EL1 to switch between different address space when context switch.</p>
+<p><code class="docutils literal notranslate"><span class="pre">required</span> <span class="pre">3-6</span></code> Set TTBR0_EL1 to switch between different address space when context switch.</p>
 </div>
 </div>
 <div class="section" id="requirement-4">
